@@ -42,7 +42,7 @@ body.ltr{direction:ltr}
 .tabs::-webkit-scrollbar{display:none}
 .tab{flex:1;min-width:72px;max-width:140px;padding:9px 6px;text-align:center;cursor:pointer;font-size:12px;font-weight:500;border-bottom:2px solid transparent;color:var(--muted);line-height:1.3;font-family:'Heebo',Arial,sans-serif;transition:color .2s}
 .tab.active{color:var(--accent);border-bottom-color:var(--accent)}
-.tab-label{display:block;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;word-break:break-word;white-space:normal;font-size:11px;line-height:1.3;max-height:2.6em}
+.tab-label{display:block;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font-size:11px;line-height:1.3}
 @media(max-width:600px){.tab{font-size:11px;padding:8px 4px;min-width:60px;max-width:110px}}
 
 /* Edit panel */
@@ -70,7 +70,7 @@ body.ltr .edit-panel textarea{direction:ltr}
 
 /* Exercise card */
 .ex-row{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;transition:border-color .2s}
-.ex-row.done{opacity:.28;filter:grayscale(.5)}
+.ex-row.done{opacity:.55;filter:grayscale(.3)}
 .ex-row.done .ex-footer{display:none}
 .ex-row.superset{border-color:rgba(251,191,36,0.3)}
 .ex-row.power-week{border-color:rgba(251,146,60,0.3)}
@@ -104,7 +104,7 @@ body.ltr .power-note{border-right:none;border-left:2px solid #fb923c}
 .yt-btn svg{width:22px;height:16px;display:block}
 
 /* Week bar */
-.day-desc{padding:0 16px 10px;font-size:13px;color:var(--muted);line-height:1.6;font-style:italic;border-bottom:1px solid var(--border);margin-bottom:4px}
+.day-desc{padding:0 16px 10px;font-size:16px;color:var(--muted);line-height:1.6;font-style:normal;border-bottom:1px solid var(--border);margin-bottom:4px}
 .week-bar{display:flex;align-items:center;gap:6px;padding:10px 16px 4px}
 .week-bar-label{font-size:11px;color:var(--muted);margin-left:auto}
 body.rtl .week-bar-label{margin-left:auto;margin-right:0}
@@ -154,21 +154,34 @@ body.ltr .week-bar-label{margin-right:auto;margin-left:0}
 .timer-track-fill{height:100%;background:var(--accent);border-radius:2px;transition:width .5s linear}
 .del-plan-btn{color:var(--red);border-color:rgba(248,113,113,0.3);background:var(--red-dim)}
 .del-plan-btn:active{background:var(--red);color:#fff}
+
+.menu-btn{background:var(--card2);border:1px solid var(--border);color:var(--accent);width:36px;height:36px;border-radius:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:.15s;position:relative}
+.menu-btn:active{background:var(--accent);color:#fff}
+.menu-dots{display:flex;flex-direction:column;gap:3px;pointer-events:none}
+.menu-dots span{width:4px;height:4px;border-radius:50%;background:currentColor;display:block}
+.dropdown-menu{display:none;position:absolute;top:44px;left:0;background:#111422;border:1px solid var(--border);border-radius:12px;padding:8px;min-width:160px;z-index:200;flex-direction:column;gap:6px}
+.dropdown-menu.open{display:flex}
+.lang-toggle-row{display:flex;gap:0;border-radius:20px;overflow:hidden;border:1px solid var(--border);background:var(--card2)}
+.lang-toggle-row button{padding:6px 14px;border:none;background:transparent;color:var(--muted);font-size:12px;font-weight:700;font-family:'Heebo',Arial,sans-serif;cursor:pointer;transition:.15s}
+.lang-toggle-row button.active{background:var(--accent);color:#fff}
 </style>
 </head>
 <body class="rtl">
 <div id="app">
   <div class="header">
-    <div class="hrow">
-      <div class="logo">GYM PRO</div>
-      <div class="hrow-right">
-        <div class="lang-toggle">
-          <button id="btnHE" class="active" onclick="setLang('he')">HE</button>
-          <button id="btnEN" onclick="setLang('en')">EN</button>
+    <div class="hrow" style="justify-content:space-between">
+      <div class="menu-btn" id="menuBtn" onclick="toggleMenu()">
+        <div class="menu-dots"><span></span><span></span><span></span></div>
+        <div class="dropdown-menu" id="dropdownMenu">
+          <div class="lang-toggle-row">
+            <button id="btnHE" class="active" onclick="event.stopPropagation();setLang('he')">HE</button>
+            <button id="btnEN" onclick="event.stopPropagation();setLang('en')">EN</button>
+          </div>
+          <button class="edit-btn del-plan-btn" id="deletePlanBtn" style="display:none;width:100%" onclick="event.stopPropagation();deletePlan()"></button>
         </div>
-        <button class="edit-btn" id="editBtn"></button>
-        <button class="edit-btn del-plan-btn" id="deletePlanBtn" style="display:none" onclick="deletePlan()"></button>
       </div>
+      <div class="logo">GYM PRO</div>
+      <button class="edit-btn" id="editBtn" style="min-width:36px;padding:7px 10px">✏️</button>
     </div>
     <div class="tabs" id="tabs"></div>
   </div>
@@ -295,9 +308,15 @@ function parseWorkout(text){
     for(var i=1;i<lines.length;i++){
       var cl=lines[i];
       if(/סופר-סט|superset/i.test(cl)){isSupersetMode=true;continue;}
-      var isEx=/^[\d•*]/.test(cl)||/סטים|חזרות|sets|reps/i.test(cl);
-      if(isEx){var card=createExerciseCard(cl,isSupersetMode);if(card){exercises.push(card);isSupersetMode=false;}}
-      else{descriptionLines.push(cl);}
+      var isEx=/^[\d•*\-◦●·]/.test(cl)||/סטים|חזרות|sets|reps/i.test(cl);
+      var isDesc=i===1&&exercises.length===0&&!/^[\d•*\-◦●·]/.test(cl)&&!/סטים|חזרות|sets|reps/i.test(cl);
+      if(isDesc){descriptionLines.push(cl);}
+      else if(isEx){var card=createExerciseCard(cl,isSupersetMode);if(card){exercises.push(card);isSupersetMode=false;}}
+      else{
+        var card2=createExerciseCard('* '+cl,isSupersetMode);
+        if(card2){exercises.push(card2);isSupersetMode=false;}
+        else{descriptionLines.push(cl);}
+      }
     }
     if(exercises.length>0){var lb=makeLabels(tabName,fi++);workouts.push({fullName:lb.full,sh:lb.sh,tabDescription:descriptionLines.join(' | '),exercises:exercises});}
   });
@@ -486,7 +505,7 @@ function renderDay(){
   var pct=total?Math.round(dc/total*100):0;
   var hasWeekVar=exercises.some(function(e){return e.weekVariants;});
   var weekMode=weekModes[curDay]||'w1';
-  var html='<div class="progress-wrap"><div class="prog-label"><span style="font-weight:500;color:var(--text)">'+day.fullName+'</span><span>'+dc+'/'+total+' '+T.exs+'</span></div><div class="prog-bar"><div class="prog-fill" style="width:'+pct+'%"></div></div></div>';
+  var html='<div class="progress-wrap"><div class="prog-label"><span style="font-weight:500;color:var(--text);font-size:16px">'+day.fullName+'</span><span>'+dc+'/'+total+' '+T.exs+'</span></div><div class="prog-bar"><div class="prog-fill" style="width:'+pct+'%"></div></div></div>';
   if(day.tabDescription)html+='<div class="day-desc">'+day.tabDescription+'</div>';
   if(hasWeekVar){html+='<div class="week-bar"><div class="week-seg"><button onclick="setWeekMode(\'w1\')" class="'+(weekMode==='w1'?'active':'')+'">'+T.week13+'</button><button onclick="setWeekMode(\'w4\')" class="'+(weekMode==='w4'?'active':'')+'">'+T.week4+'</button></div><span class="week-bar-label">'+(weekMode==='w4'?T.weekPower:T.weekNormal)+'</span></div>';}
   html+='<div class="ex-list">';
@@ -541,6 +560,16 @@ function planToText(){
 function openEditPanel(){var p=document.getElementById('editPanel');p.style.display='block';var ta=document.getElementById('planTxt');ta.value=planToText()||'';ta.focus();}
 document.getElementById('editBtn').onclick=function(){var p=document.getElementById('editPanel');if(p.style.display==='block'){p.style.display='none';return;}openEditPanel();};
 
+function toggleMenu(){
+  var m=document.getElementById('dropdownMenu');
+  m.classList.toggle('open');
+}
+document.addEventListener('click',function(e){
+  if(!e.target.closest('#menuBtn')){
+    var m=document.getElementById('dropdownMenu');
+    if(m)m.classList.remove('open');
+  }
+});
 function deletePlan(){
   if(!confirm(curLang==='he'?'למחוק את התוכנית הנוכחית?':'Delete current plan?'))return;
   plan=[];curDay=0;done={};saveDone();
