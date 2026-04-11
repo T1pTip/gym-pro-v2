@@ -495,7 +495,7 @@ function renderDay(){
     var saved=weights[wk(curDay,j)]||'';
     var ytUrl='https://www.youtube.com/results?search_query='+encodeURIComponent(ex.name+' exercise tutorial');
     var wB=ab?'':'<select id="ws_'+curDay+'_'+j+'" class="weight-select'+(saved?' picked':'')+'" onchange="onWeightChange('+curDay+','+j+',this.value,\''+encodeURIComponent(ex.name)+'\')">'+buildOpts(saved)+'</select>';
-    var catLabel=ex.cat?(curLand==='he'?ex.cat.he:ex.cat.en):'';
+    var catLabel=ex.cat?(curLang==='he'?ex.cat.he:ex.cat.en):'';
     var ssTag=ex.isSuperset?'<span class="ss-badge">'+T.supersetLbl+'</span>':'';
     var pNote=ex.weekVariants&&isPW?'<div class="power-note">'+T.powerNote+dispSets+' '+T.sets.toLowerCase()+', '+dispReps+' '+T.reps.toLowerCase()+'</div>':'';
     var rowClass='ex-row'+(isDone?' done':'')+(ex.isSuperset?' superset':'')+(ex.weekVariants&&isPW?' power-week':'');
