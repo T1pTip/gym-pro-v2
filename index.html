@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>GYM PRO</title>
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="GYM PRO">
+<meta name="theme-color" content="#0d0f1a">
+<meta name="description" content="אפליקציית אימון חכמה">
+<link rel="manifest" id="manifestLink">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Heebo:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0d0f1a;--card:#151825;--card2:#1c2030;
+  --border:rgba(99,102,241,0.15);
+  --accent:#818cf8;--accent-dim:rgba(129,140,248,0.1);--accent-border:rgba(129,140,248,0.25);
+  --red:#f87171;--red-dim:rgba(248,113,113,0.08);
+  --text:#e2e8f0;--muted:#64748b;--green:#34d399;--radius:14px
+}
+body{font-family:'Heebo',Arial,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;-webkit-text-size-adjust:100%}
+body.rtl{direction:rtl}
+body.ltr{direction:ltr}
+
+/* Header */
+.header{background:#0f1120;border-bottom:1px solid var(--border);padding:14px 16px 0;position:sticky;top:0;z-index:100}
+.hrow{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:8px}
+.logo{font-family:'Bebas Neue',Impact,sans-serif;font-size:clamp(22px,6vw,28px);color:var(--accent);letter-spacing:3px;line-height:1;flex-shrink:0}
+.hrow-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.lang-toggle{background:var(--card2);border:1px solid var(--border);border-radius:20px;display:flex;overflow:hidden;flex-shrink:0;height:36px}
+.lang-toggle button{padding:0 12px;border:none;background:transparent;color:var(--muted);font-size:12px;font-weight:700;font-family:'Heebo',Arial,sans-serif;cursor:pointer;transition:.15s;line-height:36px}
+.lang-toggle button.active{background:var(--accent);color:#fff}
+.lang-toggle button:first-child{border-radius:20px 0 0 20px}
+.lang-toggle button:last-child{border-radius:0 20px 20px 0}
+.edit-btn{background:var(--card2);border:1px solid var(--border);color:var(--accent);padding:7px 16px;border-radius:20px;cursor:pointer;font-size:13px;font-family:'Heebo',Arial,sans-serif;font-weight:500;min-height:36px;white-space:nowrap;transition:.15s}
+.edit-btn:active{background:var(--accent);color:#fff}
+.edit-btn.no-plan{background:var(--accent);color:#fff;border-color:var(--accent);font-weight:700}
+.tabs{display:flex;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;border-bottom:1px solid var(--border)}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex:1;min-width:72px;max-width:140px;padding:9px 6px;text-align:center;cursor:pointer;font-size:12px;font-weight:500;border-bottom:2px solid transparent;color:var(--muted);line-height:1.3;font-family:'Heebo',Arial,sans-serif;transition:color .2s}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.tab-label{display:block;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;word-break:break-word;white-space:normal;font-size:11px;line-height:1.3;max-height:2.6em}
+@media(max-width:600px){.tab{font-size:11px;padding:8px 4px;min-width:60px;max-width:110px}}
+
+/* Edit panel */
+.edit-panel{display:none;background:#0a0c15;border-bottom:1px solid rgba(129,140,248,0.2);padding:14px 16px}
+.edit-hint{font-size:12px;color:var(--muted);margin-bottom:10px;line-height:1.8;padding:10px 12px;background:rgba(129,140,248,0.04);border-radius:8px;border-right:2px solid rgba(129,140,248,0.2)}
+body.ltr .edit-hint{border-right:none;border-left:2px solid rgba(129,140,248,0.2)}
+.edit-hint b{color:#aaa}
+.edit-panel textarea{width:100%;height:220px;background:#07080f;color:var(--text);border:1px solid var(--border);border-radius:10px;padding:12px;resize:none;font-family:'Heebo',Arial,sans-serif;font-size:14px;line-height:1.8}
+body.rtl .edit-panel textarea{direction:rtl}
+body.ltr .edit-panel textarea{direction:ltr}
+.panel-actions{display:flex;gap:8px;margin-top:10px}
+.load-btn{flex:1;padding:13px;border:none;border-radius:10px;background:var(--accent);color:#fff;font-weight:700;cursor:pointer;font-family:'Heebo',Arial,sans-serif;font-size:15px;min-height:48px}
+.load-btn:active{opacity:.85}
+.delete-btn{padding:13px 16px;border:1px solid rgba(248,113,113,0.3);border-radius:10px;background:var(--red-dim);color:var(--red);font-weight:700;cursor:pointer;font-family:'Heebo',Arial,sans-serif;font-size:15px;min-height:48px;white-space:nowrap}
+.delete-btn:active{background:var(--red);color:#fff}
+
+/* Progress */
+.progress-wrap{padding:12px 16px 8px}
+.prog-label{font-size:12px;color:var(--muted);margin-bottom:6px;display:flex;justify-content:space-between}
+.prog-bar{height:3px;background:#1e2030;border-radius:2px;overflow:hidden}
+.prog-fill{height:100%;background:var(--accent);transition:width .4s;border-radius:2px}
+
+/* Exercise list */
+.ex-list{padding:8px 16px 160px;display:flex;flex-direction:column;gap:10px}
+
+/* Exercise card */
+.ex-row{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;transition:border-color .2s}
+.ex-row.done{opacity:.28;filter:grayscale(.5)}
+.ex-row.done .ex-footer{display:none}
+.ex-row.superset{border-color:rgba(251,191,36,0.3)}
+.ex-row.power-week{border-color:rgba(251,146,60,0.3)}
+
+/* Card top */
+.ex-top{display:flex;align-items:flex-start;gap:10px;padding:14px 16px 10px}
+.ex-num{font-family:'Bebas Neue',Impact,sans-serif;font-size:22px;color:rgba(129,140,248,0.2);min-width:26px;text-align:center;flex-shrink:0;line-height:1.1;padding-top:2px}
+.ex-info{flex:1;min-width:0}
+.ex-name{font-size:15px;font-weight:700;color:var(--text);margin-bottom:8px;line-height:1.3;word-break:break-word;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.ex-meta{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.badge{background:var(--accent-dim);border:1px solid var(--accent-border);border-radius:20px;padding:3px 11px;font-size:12px;color:#94a3b8;white-space:nowrap;line-height:1.4}
+.badge b{color:var(--accent)}
+.cat-badge{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:20px;padding:3px 11px;font-size:12px;color:#475569;line-height:1.4}
+.weight-select{background:var(--accent-dim);border:1px solid var(--accent-border);border-radius:20px;padding:3px 22px 3px 10px;font-size:12px;font-family:'Heebo',Arial,sans-serif;color:#94a3b8;cursor:pointer;outline:none;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0l4 5 4-5z' fill='%23818cf8'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:left 7px center;line-height:1.4}
+.weight-select.picked{color:var(--accent)}
+.weight-select option{background:#0d0f1a;color:var(--text)}
+.ss-badge{background:rgba(251,191,36,0.1);border:1px solid rgba(251,191,36,0.25);color:#fbbf24;font-size:10px;padding:1px 7px;border-radius:10px;font-weight:700}
+.power-note{font-size:11px;color:#fb923c;margin-top:6px;padding:4px 8px;background:rgba(251,146,60,0.07);border-radius:6px;border-right:2px solid #fb923c;display:none}
+body.ltr .power-note{border-right:none;border-left:2px solid #fb923c}
+.power-week .power-note{display:block}
+
+/* Card footer — buttons in a row */
+.ex-footer{display:flex;gap:8px;padding:10px 16px 14px;border-top:1px solid var(--border)}
+.check-btn{flex:1;background:var(--accent-dim);border:1px solid var(--accent-border);color:var(--accent);padding:9px 12px;border-radius:10px;cursor:pointer;font-size:13px;font-weight:700;font-family:'Heebo',Arial,sans-serif;min-height:42px;text-align:center;transition:.15s}
+.check-btn:active{background:var(--accent);color:#fff}
+.check-btn.done-state{background:rgba(52,211,153,0.06);color:rgba(52,211,153,0.45);border-color:rgba(52,211,153,0.15);font-size:12px}
+.hist-btn{background:rgba(129,140,248,0.06);border:1px solid var(--border);color:var(--muted);padding:9px 14px;border-radius:10px;cursor:pointer;font-size:17px;min-height:42px;min-width:46px;display:flex;align-items:center;justify-content:center;transition:.15s}
+.hist-btn:active{background:var(--accent-dim);color:var(--accent)}
+.yt-btn{background:rgba(255,0,0,0.05);border:1px solid rgba(255,0,0,0.12);padding:9px 14px;border-radius:10px;cursor:pointer;min-height:42px;min-width:46px;display:flex;align-items:center;justify-content:center;transition:.15s;text-decoration:none}
+.yt-btn:active{background:rgba(255,0,0,0.12)}
+.yt-btn svg{width:22px;height:16px;display:block}
+
+/* Week bar */
+.day-desc{padding:0 16px 10px;font-size:13px;color:var(--muted);line-height:1.6;font-style:italic;border-bottom:1px solid var(--border);margin-bottom:4px}
+.week-bar{display:flex;align-items:center;gap:6px;padding:10px 16px 4px}
+.week-bar-label{font-size:11px;color:var(--muted);margin-left:auto}
+body.rtl .week-bar-label{margin-left:auto;margin-right:0}
+body.ltr .week-bar-label{margin-right:auto;margin-left:0}
+.week-seg{display:flex;background:#07080f;border:1px solid var(--border);border-radius:20px;overflow:hidden;flex-shrink:0}
+.week-seg button{padding:5px 14px;border:none;background:transparent;color:var(--muted);font-size:11px;font-weight:600;font-family:'Heebo',Arial,sans-serif;cursor:pointer;transition:.15s;white-space:nowrap}
+.week-seg button.active{background:var(--accent);color:#fff}
+.week-seg button:first-child{border-radius:20px 0 0 20px}
+.week-seg button:last-child{border-radius:0 20px 20px 0}
+
+/* Empty state */
+.empty-state{text-align:center;padding:70px 20px 40px;color:var(--muted)}
+.empty-big{font-family:'Bebas Neue',Impact,sans-serif;font-size:clamp(40px,12vw,56px);color:#1a1e35;margin-bottom:12px}
+.empty-hint{font-size:14px;color:#334155;margin-bottom:28px;line-height:1.6}
+.empty-cta{display:inline-block;padding:14px 32px;background:var(--accent);color:#fff;font-weight:700;border-radius:12px;font-size:15px;font-family:'Heebo',Arial,sans-serif;cursor:pointer;border:none}
+
+/* History Modal */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:200;align-items:flex-end;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal-sheet{background:#111422;border-radius:20px 20px 0 0;width:100%;max-width:560px;padding:20px;max-height:75vh;overflow-y:auto}
+.modal-handle{width:40px;height:4px;background:rgba(255,255,255,0.08);border-radius:2px;margin:0 auto 16px}
+.modal-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:2px}
+.modal-sub{font-size:12px;color:var(--muted);margin-bottom:14px}
+.hist-stats{display:flex;gap:10px;margin-bottom:16px}
+.hist-stat{flex:1;background:var(--card2);border-radius:10px;padding:10px 12px;text-align:center}
+.hist-stat-val{font-size:18px;font-weight:700;color:var(--accent)}
+.hist-stat-lbl{font-size:11px;color:var(--muted);margin-top:2px}
+.hist-chart-wrap{height:150px;position:relative;margin-bottom:4px}
+.hist-empty{text-align:center;color:var(--muted);font-size:13px;padding:32px 0;line-height:1.8}
+
+/* Rest Timer */
+.timer-bar{position:fixed;bottom:0;left:0;right:0;background:#0f1120;border-top:1px solid rgba(129,140,248,0.2);padding:12px 16px 22px;z-index:150;display:none;flex-direction:column;align-items:center;gap:10px}
+.timer-bar.active{display:flex}
+.timer-row{display:flex;align-items:center;gap:12px;width:100%;max-width:400px}
+.timer-ring-wrap{position:relative;width:52px;height:52px;flex-shrink:0}
+.timer-ring-wrap svg{transform:rotate(-90deg)}
+.timer-ring-bg{fill:none;stroke:rgba(129,140,248,0.12);stroke-width:4}
+.timer-ring-fill{fill:none;stroke:var(--accent);stroke-width:4;stroke-linecap:round;transition:stroke-dashoffset .5s linear}
+.timer-num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--accent);font-family:'Heebo',Arial,sans-serif}
+.timer-info{flex:1;min-width:0}
+.timer-label{font-size:12px;color:var(--muted);margin-bottom:2px}
+.timer-exercise{font-size:14px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.timer-btns{display:flex;gap:7px;flex-shrink:0}
+.timer-add{background:var(--accent-dim);border:1px solid var(--accent-border);color:var(--accent);padding:7px 12px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:700;font-family:'Heebo',Arial,sans-serif}
+.timer-skip{background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.2);color:var(--red);padding:7px 12px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:700;font-family:'Heebo',Arial,sans-serif}
+.timer-track{width:100%;max-width:400px;height:3px;background:rgba(129,140,248,0.08);border-radius:2px;overflow:hidden}
+.timer-track-fill{height:100%;background:var(--accent);border-radius:2px;transition:width .5s linear}
+</style>
+</head>
+<body class="rtl">
+<div id="app">
+  <div class="header">
+    <div class="hrow">
+      <div class="logo">GYM PRO</div>
+      <div class="hrow-right">
+        <div class="lang-toggle">
+          <button id="btnHE" class="active" onclick="setLang('he')">HE</button>
+          <button id="btnEN" onclick="setLang('en')">EN</button>
+        </div>
+        <button class="edit-btn" id="editBtn"></button>
+      </div>
+    </div>
+    <div class="tabs" id="tabs"></div>
+  </div>
+  <div class="edit-panel" id="editPanel">
+    <div class="edit-hint" id="hintBox"></div>
+    <textarea id="planTxt"></textarea>
+    <div class="panel-actions" id="panelActions"></div>
+  </div>
+  <div id="dayContent"></div>
+</div>
+
+<!-- History Modal -->
+<div class="modal-overlay" id="histModal" onclick="if(event.target===this)closeHistModal()">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="histTitle"></div>
+    <div class="modal-sub" id="histSub"></div>
+    <div class="hist-stats" id="histStats"></div>
+    <div class="hist-chart-wrap"><canvas id="histCanvas" style="width:100%;height:150px"></canvas></div>
+    <div class="hist-empty" id="histEmpty" style="display:none"></div>
+  </div>
+</div>
+
+<!-- Rest Timer -->
+<div class="timer-bar" id="timerBar">
+  <div class="timer-row">
+    <div class="timer-ring-wrap">
+      <svg viewBox="0 0 52 52" width="52" height="52">
+        <circle class="timer-ring-bg" cx="26" cy="26" r="22"/>
+        <circle class="timer-ring-fill" id="timerRing" cx="26" cy="26" r="22" stroke-dasharray="138.2" stroke-dashoffset="0"/>
+      </svg>
+      <div class="timer-num" id="timerNum">1:30</div>
+    </div>
+    <div class="timer-info">
+      <div class="timer-label" id="timerLabel">מנוחה</div>
+      <div class="timer-exercise" id="timerEx"></div>
+    </div>
+    <div class="timer-btns">
+      <button class="timer-add" onclick="addTime(30)">+30</button>
+      <button class="timer-skip" id="timerSkipBtn" onclick="skipTimer()">דלג</button>
+    </div>
+  </div>
+  <div class="timer-track"><div class="timer-track-fill" id="timerFill" style="width:100%"></div></div>
+</div>
+
+<script>
+var LANG={
+  he:{
+    editBtn:'✏️ ערוך תוכנית',openPlan:'📂 טען תוכנית',loadBtn:'📂 טען תוכנית',deleteBtn:'🗑️ מחק',
+    sets:'סטים',reps:'חזרות',done:'סיימתי',completed:'✓ הושלם',exs:'תרגילים',
+    emptyHint:'אין תוכנית אימון טעונה',emptyCta:'📂 טען תוכנית',noEx:'לא נמצאו תרגילים. נסה שוב.',
+    week13:'שבועות 1–3',week4:'שבוע 4/8',weekPower:'🔥 שבוע כוח',weekNormal:'שבוע רגיל',
+    powerNote:'🔥 שבוע כוח: ',supersetLbl:'סופר-סט',setsLabel:'סטים: ',repsLabel:'חזרות: ',
+    weightOpt:'משקל',timerRest:'מנוחה',timerSkip:'דלג',
+    histTitle:'היסטוריית משקלים',histMax:'מקסימום',histLast:'אחרון',histSess:'אימונים',
+    histEmpty:'אין היסטוריה עדיין.\nתתחיל לתעד משקלים!',
+    installTitle:'📲 הוסף למסך הבית',installSub:'גש ל-GYM PRO ישירות כמו אפליקציה',installBtn:'התקן',
+    hintHTML:'<b>מבנה כל בלוק (מופרד בשורה ריקה כפולה):</b><br>שורה 1 → <b>שם הטאב</b><br>שורה 2 → <b>תיאור</b><br>שורות 3+ → <b>תרגילים</b> (מתחילים ב-* או מספר)<br>פורמט: <b>שם: X סטים, Y חזרות</b><br>שורת <b>סופר-סט</b> מw�בצת תרגילים בצהוב',
+    placeholder:'אימון A — חזה + רגליים\nאימון משלב כוח\n* בנץ פרס: 4 סטים, 8-10 חזרות\n* סקוואט: 4 סטים, 6 חזרות\n\nאימון B — זרועות\nסופר-סט לזרועות\nסופר-סט\n* כפיפת מרפקים: 3 סטים, 10-12 חזרות\n* פשיטת מרפקים: 3 סטים, 10-12 חזרות'
+  },
+  en:{
+    editBtn:'✏️ Edit Plan',openPlan:'📂 Load Plan',loadBtn:'📂 Load Plan',deleteBtn:'🗑️ Clear',
+    sets:'Sets',reps:'Reps',done:'Done',completed:'✓ Done',exs:'exercises',
+    emptyHint:'No workout plan loaded',emptyCta:'📂 Load a Plan',noEx:'No exercises found. Please try again.',
+    week13:'Weeks 1–3',week4:'Week 4/8',weekPower:'🔥 Power Week',weekNormal:'Regular Week',
+    powerNote:'🔥 Power week: ',supersetLbl:'Superset',setsLabel:'Sets: ',repsLabel:'Reps: ',
+    weightOpt:'Weight',timerRest:'Rest',timerSkip:'Skip',
+    histTitle:'Weight History',histMax:'Max',histLast:'Last',histSess:'Sessions',
+    histEmpty:'No history yet.\nStart tracking weights!',
+    installTitle:'📲 Add to Home Screen',installSub:'Access GYM PRO like a native app',installBtn:'Install',
+    hintHTML:'<b>Block structure (separated by double blank line):</b><br>Line 1 → <b>Tab name</b><br>Line 2 → <b>Description</b><br>Lines 3+ → <b>Exercises</b> (starting with * or number)<br>Format: <b>Name: X sets, Y reps</b><br>A <b>superset</b> line groups exercises in gold',
+    placeholder:'Workout A — Chest + Legs\nCombined strength session\n* Bench Press: 4 sets, 8-10 reps\n* Squat: 4 sets, 6 reps\n\nWorkout B — Arms\nSuperset for arms\nsuperset\n* Bicep Curl: 3 sets, 10-12 reps\n* Tricep Extension: 3 sets, 10-12 reps'
+  }
+};
+var curLang='he';try{curLang=localStorage.getItem('gym_lang')||'he';}catch(e){}
+var T=LANG[curLang];
+
+function setLang(lang){
+  curLang=lang;T=LANG[lang];
+  try{localStorage.setItem('gym_lang',lang);}catch(e){}
+  document.documentElement.lang=lang==='he'?'he':'en';
+  document.body.className=lang==='he'?'rtl':'ltr';
+  document.getElementById('btnHE').className=lang==='he'?'active':'';
+  document.getElementById('btnEN').className=lang==='en'?'active':'';
+  document.getElementById('timerLabel').textContent=T.timerRest;
+  document.getElementById('timerSkipBtn').textContent=T.timerSkip;
+  applyHint();updateUI();renderTabs();renderDay();
+}
+function applyHint(){
+  document.getElementById('hintBox').innerHTML=T.hintHTML;
+  document.getElementById('planTxt').placeholder=T.placeholder;
+}
+
+var MMAP=[
+  [/bench|benz|בנץ|chest|חזה|pec|fly|פלאי|incline|decline/i,{he:'חזה',en:'Chest'}],
+  [/squat|סקוואט|leg.*press|lunge|extension|hamstring|רגל/i,{he:'רגליים',en:'Legs'}],
+  [/deadlift|דדליפט|row|גב|back|lat|pull|מתח|חתירה/i,{he:'גב',en:'Back'}],
+  [/shoulder|כתף|lateral|front raise|ohp/i,{he:'כתפיים',en:'Shoulders'}],
+  [/bicep|ביספ|curl|כפיפות|hammer|preacher/i,{he:'ביספס',en:'Biceps'}],
+  [/tricep|טריס|pushdown|skull|dip/i,{he:'טריספס',en:'Triceps'}],
+  [/calf|שוק/i,{he:'שוקיים',en:'Calves'}],
+  [/crunch|plank|ab |abs|בטן|core|sit.?up|פלאנק/i,{he:'בטן',en:'Core'}]
+];
+function guesscat(n){for(var i=0;i<MMAP.length;i++)if(MMAP[i][0].test(n))return MMAP[i][1];return null;}
+
+function cleanRawText(text){
+  if(!text)return'';
+  var lines=text.split('\n').map(function(l){return l.trim();}).filter(function(l){return l&&!l.includes('____')&&!l.includes('פרמטר')&&!l.includes('עצימות (RIR)');});
+  var processed=[];
+  lines.forEach(function(line){
+    var l=line.replace(/בשבועות\s*1-3/g,'שבועות 1–3').replace(/שבועות\s*4[,\/]\s*8/g,'שבוע 4/8').replace(/בשבועות\s*4\s*ו-8/g,'שבוע 4/8');
+    var isHeader=/אימון\s+[A-C]/i.test(l)||/[💪🦵💡⚡]/.test(l);
+    processed.push(isHeader?'\n\n'+l:l);
+  });
+  return processed.join('\n').trim();
+}
+function parseWorkout(text){
+  var blocks=text.split(/\n{2,}/);var workouts=[];var fi=0;
+  blocks.forEach(function(block){
+    var lines=block.split('\n').map(function(l){return l.trim();}).filter(function(l){return l!=='';});
+    if(lines.length<1)return;
+    var tabName=lines[0].replace(/[💪🦵💡⚡]/g,'').trim();
+    var exercises=[];var descriptionLines=[];var isSupersetMode=false;
+    for(var i=1;i<lines.length;i++){
+      var cl=lines[i];
+      if(/סופר-סט|superset/i.test(cl)){isSupersetMode=true;continue;}
+      var isEx=/^[\d•*]/.test(cl)||/סטים|חזרות|sets|reps/i.test(cl);
+      if(isEx){var card=createExerciseCard(cl,isSupersetMode);if(card){exercises.push(card);isSupersetMode=false;}}
+      else{descriptionLines.push(cl);}
+    }
+    if(exercises.length>0){var lb=makeLabels(tabName,fi++);workouts.push({fullName:lb.full,sh:lb.sh,tabDescription:descriptionLines.join(' | '),exercises:exercises});}
+  });
+  return workouts;
+}
+function createExerciseCard(exerciseLine,isSuperset){
+  var hasBullet=/^[\*\-•◦●·]/.test(exerciseLine);
+  var hasNumbered=/^\d+[\.\)\-\s]/.test(exerciseLine)||/^[א-ו][\.\)]/.test(exerciseLine);
+  var hasByContent=/\d+\s*(?:סטים|sets?)/i.test(exerciseLine)&&/(?:חזרות|reps?)/i.test(exerciseLine);
+  if(!hasBullet&&!hasNumbered&&!hasByContent)return null;
+  var clean=exerciseLine.replace(/^[\*\-•◦●·\s]+/,'').replace(/^\d+[\.\)\-\s]+/,'').replace(/^[א-ו][\.\)]\s*/,'').trim();
+  if(!clean||clean.length<2)return null;
+  var name=clean,sets='3',reps='10',m;
+  m=clean.match(/^(.+?):\s*(\d+)\s*סטים,?\s*([\d–\-]+)\s*חזרות/i);if(m){name=m[1].trim();sets=m[2];reps=m[3];}
+  if(name===clean){m=clean.match(/^(.+?):\s*(\d+)\s*sets?,?\s*([\d\-]+)\s*reps?/i);if(m){name=m[1].trim();sets=m[2];reps=m[3];}}
+  if(name===clean){m=clean.match(/^(.+?)\s+(\d+)\s*[xX×*]\s*([\d\-]+)\s*$/i);if(m){name=m[1].trim();sets=m[2];reps=m[3];}}
+  if(name===clean){m=clean.match(/^(.+?)\s+(\d+)\s*סטים\s*(?:של\s*)?([\d–\-]+)\s*חזרות/);if(m){name=m[1].trim();sets=m[2];reps=m[3].replace('–','-');}}
+  if(name===clean){m=clean.match(/^(.+?)\s+(\d+)\s*sets?\s+(?:of\s*)?([\d\-]+)\s*reps?/i);if(m){name=m[1].trim();sets=m[2];reps=m[3];}}
+  if(name===clean&&hasByContent){m=clean.match(/^([^.]+)\./);if(m)name=m[1].trim();var ms=clean.match(/(\d+)\s*סטים/),mr=clean.match(/([\d–\-]+)\s*חזרות/);if(ms)sets=ms[1];if(mr)reps=mr[1].replace('–','-');}
+  name=name.replace(/[;:,]\s*(?:שבועות?\s*[\d–\-\/,]+.*)?$/i,'').trim();
+  if(!name||name.length<2)return null;
+  var weekVariants=null;
+  var mw1=clean.match(/(?:שבועות\s*1[-–]3|weeks?\s*1[-–]3)[^;|]*?(\d+)\s*(?:סטים|sets?)[^;|]*?([\d–\-]+)\s*(?:חזרות|reps?)/i);
+  var mw4=clean.match(/(?:שבוע\s*(?:4|8|4[\/,]\s*8)|weeks?\s*(?:4|8|4[\/,]\s*8))[^;|]*?(\d+)\s*(?:סטים|sets?)[^;|]*?([\d–\-]+)\s*(?:חזרות|reps?)/i);
+  if(mw1||mw4){weekVariants={w1:mw1?{sets:mw1[1],reps:mw1[2]}:{sets:sets,reps:reps},w4:mw4?{sets:mw4[1],reps:mw4[2]}:{sets:sets,reps:reps}};if(mw1){sets=mw1[1];reps=mw1[2];}}
+  return{name:name,sets:sets,reps:reps,cat:guesscat(name),isSuperset:!!isSuperset,weekVariants:weekVariants};
+}
+var AB_KW=['בטן','פלאנק','crunch','plank','ab ','abs','leg raise','sit up'];
+function isAb(n){return AB_KW.some(function(k){return n.toLowerCase().indexOf(k)>=0;});}
+function buildOpts(s){var o='<option value="">'+T.weightOpt+'</option>';for(var w=5;w<=200;w+=5)o+='<option value="'+w+'"'+(s==w?' selected':'')+'>'+w+' kg</option>';return o;}
+function makeLabels(name,fi){var fb=curLang==='he'?'אימון '+String.fromCharCode(65+fi):'Workout '+String.fromCharCode(65+fi);var full=(name||'').trim()||fb;var sh=full.split(/\s*[—–\-]\s*/)[0].trim();if(sh.length>10)sh=sh.substring(0,9)+'…';return{full:full,sh:sh};}
+
+/* STATE */
+var STORAGE_KEY='gym_plan_v3';
+var plan=[],curDay=0,done={},weights={},weekModes={};
+try{done=JSON.parse(localStorage.getItem('gym_done3')||'{}');}catch(e){}
+try{weights=JSON.parse(localStorage.getItem('gym_weights')||'{}');}catch(e){}
+try{weekModes=JSON.parse(localStorage.getItem('gym_week_modes')||'{}');}catch(e){}
+(function(){try{var t=new Date().toDateString();if(localStorage.getItem('gym_reset3')!==t){done={};localStorage.setItem('gym_reset3',t);}}catch(e){}})();
+function saveDone(){try{localStorage.setItem('gym_done3',JSON.stringify(done));}catch(e){}}
+function saveW(){try{localStorage.setItem('gym_weights',JSON.stringify(weights));}catch(e){}}
+function saveWeekModes(){try{localStorage.setItem('gym_week_modes',JSON.stringify(weekModes));}catch(e){}}
+function wk(d,j){return d+'_'+j;}
+function setWeekMode(mode){weekModes[curDay]=mode;saveWeekModes();renderDay();}
+
+/* WEIGHT HISTORY */
+var HIST_KEY='gym_weight_history_v2';
+function exKey(n){return n.toLowerCase().replace(/[\s\-\/]+/g,'_').replace(/[^a-z0-9_\u0590-\u05ff]/g,'').replace(/_+/g,'_').slice(0,40);}
+function loadHist(){try{return JSON.parse(localStorage.getItem(HIST_KEY)||'{}');}catch(e){return{};}}
+function saveHist(h){try{localStorage.setItem(HIST_KEY,JSON.stringify(h));}catch(e){}}
+function recordWeight(exName,kg){
+  if(!kg||isNaN(kg))return;
+  var h=loadHist(),k=exKey(exName);
+  if(!h[k])h[k]=[];
+  var today=new Date().toISOString().slice(0,10);
+  var idx=-1;for(var i=0;i<h[k].length;i++){if(h[k][i].date===today){idx=i;break;}}
+  if(idx>=0){h[k][idx].kg=+kg;}else{h[k].push({date:today,kg:+kg});}
+  if(h[k].length>30)h[k]=h[k].slice(-30);
+  saveHist(h);
+}
+function openHistModal(encodedName){
+  var exName=decodeURIComponent(encodedName);
+  var h=loadHist(),k=exKey(exName),data=h[k]||[];
+  document.getElementById('histTitle').textContent=exName;
+  document.getElementById('histSub').textContent=T.histTitle;
+  var statsEl=document.getElementById('histStats');
+  var emptyEl=document.getElementById('histEmpty');
+  var canvasWrap=document.querySelector('.hist-chart-wrap');
+  if(!data.length){
+    statsEl.innerHTML='';emptyEl.style.display='block';canvasWrap.style.display='none';
+    emptyEl.textContent=T.histEmpty;
+    document.getElementById('histModal').classList.add('open');return;
+  }
+  emptyEl.style.display='none';canvasWrap.style.display='block';
+  var kgs=data.map(function(d){return d.kg;});
+  var maxKg=Math.max.apply(null,kgs),lastKg=kgs[kgs.length-1],prevKg=kgs.length>1?kgs[kgs.length-2]:lastKg;
+  var diff=lastKg-prevKg,trendColor=diff>=0?'#34d399':'#f87171',trendStr=(diff>=0?'+':'')+diff+'kg';
+  statsEl.innerHTML=
+    '<div class="hist-stat"><div class="hist-stat-val">'+maxKg+'kg</div><div class="hist-stat-lbl">'+T.histMax+'</div></div>'+
+    '<div class="hist-stat"><div class="hist-stat-val">'+lastKg+'kg</div><div class="hist-stat-lbl">'+T.histLast+'</div></div>'+
+    '<div class="hist-stat"><div class="hist-stat-val" style="color:'+trendColor+'">'+trendStr+'</div><div class="hist-stat-lbl">'+data.length+' '+T.histSess+'</div></div>';
+  setTimeout(function(){
+    var canvas=document.getElementById('histCanvas');
+    var cw=canvas.offsetWidth||320;
+    canvas.width=cw*2;canvas.height=300;canvas.style.width=cw+'px';canvas.style.height='150px';
+    var ctx=canvas.getContext('2d');ctx.scale(2,2);
+    var last=data.slice(-10),n=last.length;
+    var kgs2=last.map(function(d){return d.kg;});
+    var minK=Math.min.apply(null,kgs2)*0.92,maxK=Math.max.apply(null,kgs2)*1.06;
+    var pL=8,pR=8,pT=22,pB=32,bw=Math.min(36,(cw-pL-pR)/n-5);
+    var gap=(cw-pL-pR-n*bw)/(n+1);
+    ctx.clearRect(0,0,cw,150);
+    for(var gi=0;gi<=3;gi++){var gy=pT+(150-pT-pB)*gi/3;ctx.strokeStyle='rgba(99,102,241,0.07)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(pL,gy);ctx.lineTo(cw-pR,gy);ctx.stroke();}
+    last.forEach(function(d,i){
+      var x=pL+gap+i*(bw+gap);
+      var ratio=(d.kg-minK)/(maxK-minK||1);
+      var barH=Math.max(4,(150-pT-pB)*ratio);
+      var y=150-pB-barH;
+      var isLast=(i===n-1);
+      ctx.fillStyle=isLast?'#818cf8':'rgba(129,140,248,0.3)';
+      if(ctx.roundRect){ctx.beginPath();ctx.roundRect(x,y,bw,barH,3);ctx.fill();}
+      else{ctx.fillRect(x,y,bw,barH);}
+      if(isLast){ctx.fillStyle='#818cf8';ctx.font='bold 10px Heebo,Arial,sans-serif';ctx.textAlign='center';ctx.fillText(d.kg+'kg',x+bw/2,y-5);}
+      var ds=d.date.slice(5);ctx.fillStyle='rgba(100,116,139,0.7)';ctx.font='9px Heebo,Arial,sans-serif';ctx.textAlign='center';ctx.fillText(ds,x+bw/2,150-pB+12);
+    });
+  },60);
+  document.getElementById('histModal').classList.add('open');
+}
+function closeHistModal(){document.getElementById('histModal').classList.remove('open');}
+
+/* REST TIMER */
+var timerIv=null,timerTotal=90,timerRemain=90;
+function startTimer(exName){
+  var pref=90;try{pref=parseInt(localStorage.getItem('gym_timer_pref_v2'))||90;}catch(e){}
+  timerTotal=pref;timerRemain=pref;
+  document.getElementById('timerEx').textContent=exName;
+  document.getElementById('timerLabel').textContent=T.timerRest;
+  document.getElementById('timerBar').classList.add('active');
+  updateTimerUI();
+  clearInterval(timerIv);
+  timerIv=setInterval(function(){
+    timerRemain--;
+    if(timerRemain<=0){timerRemain=0;updateTimerUI();clearInterval(timerIv);beep();setTimeout(skipTimer,1800);}
+    else{updateTimerUI();}
+  },1000);
+}
+function updateTimerUI(){
+  var m=Math.floor(timerRemain/60),s=timerRemain%60;
+  var el=document.getElementById('timerNum');
+  if(timerRemain===0){el.textContent='✓';el.style.color='#34d399';}
+  else{el.textContent=m+':'+(s<10?'0':'')+s;el.style.color='';}
+  var pct=timerRemain/timerTotal;
+  document.getElementById('timerRing').setAttribute('stroke-dashoffset',(138.2*(1-pct)).toFixed(1));
+  document.getElementById('timerFill').style.width=(pct*100)+'%';
+}
+function addTime(s){timerRemain+=s;timerTotal=Math.max(timerTotal,timerRemain);updateTimerUI();}
+function skipTimer(){clearInterval(timerIv);document.getElementById('timerBar').classList.remove('active');document.getElementById('timerNum').style.color='';}
+function beep(){try{var ac=new(window.AudioContext||window.webkitAudioContext)();var o=ac.createOscillator();var g=ac.createGain();o.connect(g);g.connect(ac.destination);o.type='sine';o.frequency.value=880;g.gain.setValueAtTime(0.25,ac.currentTime);g.gain.exponentialRampToValueAtTime(0.001,ac.currentTime+0.7);o.start(ac.currentTime);o.stop(ac.currentTime+0.7);}catch(e){}}
+
+/* UI */
+function updateUI(){
+  var hasPlan=plan.length>0;
+  var eb=document.getElementById('editBtn'),pa=document.getElementById('panelActions');
+  eb.textContent=hasPlan?T.editBtn:T.openPlan;
+  eb.className='edit-btn'+(hasPlan?'':' no-plan');
+  if(hasPlan){pa.innerHTML='<button class="load-btn" onclick="doLoad()">'+T.loadBtn+'</button><button class="delete-btn" onclick="document.getElementById(\'planTxt\').value=\'\';document.getElementById(\'planTxt\').focus()">'+T.deleteBtn+'</button>';}
+  else{pa.innerHTML='<button class="load-btn" onclick="doLoad()">'+T.loadBtn+'</button>';}
+}
+function doLoad(){
+  var raw=document.getElementById('planTxt').value.trim();if(!raw)return;
+  var parsed=parseWorkout(cleanRawText(raw));if(!parsed.length){alert(T.noEx);return;}
+  plan=parsed;curDay=0;done={};saveDone();
+  try{localStorage.setItem(STORAGE_KEY,JSON.stringify(plan));}catch(e){}
+  document.getElementById('editPanel').style.display='none';
+  updateUI();renderTabs();renderDay();
+}
+function onWeightChange(d,j,val,eName){
+  var k=wk(d,j);
+  if(val){weights[k]=val;recordWeight(decodeURIComponent(eName),parseInt(val));}
+  else{delete weights[k];}
+  saveW();
+  var sel=document.getElementById('ws_'+d+'_'+j);
+  if(sel)sel.className='weight-select'+(val?' picked':'');
+}
+function renderTabs(){
+  var el=document.getElementById('tabs');if(!plan.length){el.innerHTML='';return;}
+  var html='';
+  for(var i=0;i<plan.length;i++){
+    var d=plan[i],total=d.exercises.length,dc=0;
+    for(var j=0;j<d.exercises.length;j++){if(done[i+'_'+j])dc++;}
+    var prog=dc>0?'<span style="display:block;color:var(--accent);font-size:10px;margin-top:2px">'+dc+'/'+total+'</span>':'';
+    html+='<div class="tab'+(i===curDay?' active':'')+'" onclick="switchDay('+i+')" title="'+d.fullName+'"><span class="tab-label">'+d.fullName+'</span>'+prog+'</div>';
+  }
+  el.innerHTML=html;
+}
+
+var YT_SVG='<svg viewBox="0 0 24 17" width="22" height="16"><path fill="#FF0000" d="M23.5 2.6s-.3-1.9-1.1-2.7c-1-.9-2.2-.9-2.7-.9C16.6 0 12 0 12 0S7.4 0 5.3.1C4.8.1 3.6.1 2.6 1 1.8 1.8 1.5 3.7 1.5 3.7S1.2 5.9 1.2 8v1.9c0 2.1.3 4.3.3 4.3s.3 1.9 1.1 2.7c1 .9 2.4.8 3 .9C7.9 18 12 18 12 18s4.6 0 6.7-.2c.5-.1 1.7-.1 2.7-1 .8-.8 1.1-2.7 1.1-2.7s.3-2.2.3-4.3V8c0-2.1-.3-4.4-.3-4.4zM9.7 13V5.6l7.5 3.7-7.5 3.7z"/></svg>';
+
+function renderDay(){
+  var content=document.getElementById('dayContent');
+  if(!plan.length){content.innerHTML='<div class="empty-state"><div class="empty-big">GYM PRO</div><div class="empty-hint">'+T.emptyHint+'</div><button class="empty-cta" onclick="openEditPanel()">'+T.emptyCta+'</button></div>';return;}
+  var day=plan[curDay],exercises=day.exercises||[];
+  var total=exercises.length,dc=0;
+  for(var j=0;j<total;j++){if(done[curDay+'_'+j])dc++;}
+  var pct=total?Math.round(dc/total*100):0;
+  var hasWeekVar=exercises.some(function(e){return e.weekVariants;});
+  var weekMode=weekModes[curDay]||'w1';
+  var html='<div class="progress-wrap"><div class="prog-label"><span style="font-weight:500;color:var(--text)">'+day.fullName+'</span><span>'+dc+'/'+total+' '+T.exs+'</span></div><div class="prog-bar"><div class="prog-fill" style="width:'+pct+'%"></div></div></div>';
+  if(day.tabDescription)html+='<div class="day-desc">'+day.tabDescription+'</div>';
+  if(hasWeekVar){html+='<div class="week-bar"><div class="week-seg"><button onclick="setWeekMode(\'w1\')" class="'+(weekMode==='w1'?'active':'')+'">'+T.week13+'</button><button onclick="setWeekMode(\'w4\')" class="'+(weekMode==='w4'?'active':'')+'">'+T.week4+'</button></div><span class="week-bar-label">'+(weekMode==='w4'?T.weekPower:T.weekNormal)+'</span></div>';}
+  html+='<div class="ex-list">';
+  for(var j=0;j<exercises.length;j++){
+    var ex=exercises[j];
+    var dispSets=ex.sets,dispReps=ex.reps;
+    var isPW=(weekMode==='w4');
+    if(ex.weekVariants){var v=isPW?ex.weekVariants.w4:ex.weekVariants.w1;dispSets=v.sets;dispReps=v.reps;}
+    var isDone=!!done[curDay+'_'+j],ab=isAb(ex.name);
+    var saved=weights[wk(curDay,j)]||'';
+    var ytUrl='https://www.youtube.com/results?search_query='+encodeURIComponent(ex.name+' exercise tutorial');
+    var wB=ab?'':'<select id="ws_'+curDay+'_'+j+'" class="weight-select'+(saved?' picked':'')+'" onchange="onWeightChange('+curDay+','+j+',this.value,\''+encodeURIComponent(ex.name)+'\')">'+buildOpts(saved)+'</select>';
+    var catLabel=ex.cat?(curLand==='he'?ex.cat.he:ex.cat.en):'';
+    var ssTag=ex.isSuperset?'<span class="ss-badge">'+T.supersetLbl+'</span>':'';
+    var pNote=ex.weekVariants&&isPW?'<div class="power-note">'+T.powerNote+dispSets+' '+T.sets.toLowerCase()+', '+dispReps+' '+T.reps.toLowerCase()+'</div>':'';
+    var rowClass='ex-row'+(isDone?' done':'')+(ex.isSuperset?' superset':'')+(ex.weekVariants&&isPW?' power-week':'');
+    var enc=encodeURIComponent(ex.name);
+    html+='<div class="'+rowClass+'" id="row_'+j+'">'
+      +'<div class="ex-top"><div class="ex-num">'+(j+1)+'</div>'
+      +'<div class="ex-info">'
+        +'<div class="ex-name">'+ex.name+(catLabel?' <span class="cat-badge">'+catLabel+'</span>':'')+' '+ssTag+'</div>'
+        +'<div class="ex-meta"><div class="badge">'+T.setsLabel+'<b>'+dispSets+'</b></div><div class="badge">'+T.repsLabel+'<b>'+dispReps+'</b></div>'+wB+'</div>'
+        +pNote
+      +'</div></div>'
+      +'<div class="ex-footer">'
+        +'<button class="check-btn'+(isDone?' done-state':'')+'" id="cb_'+j+'" onclick="toggleDone('+j+',\''+enc+'\')">'+(isDone?T.completed:T.done)+'</button>'
+        +'<button class="hist-btn" onclick="openHistModal(\''+enc+'\')" title="History">&#128200;</button>'
+        +'<a class="yt-btn" href="'+ytUrl+'" target="_blank" title="YouTube">'+YT_SVG+'</a>'
+      +'</div>'
+    +'</div>';
+  }
+  html+='</div>';
+  content.innerHTML=html;
+}
+
+function switchDay(i){curDay=i;renderTabs();renderDay();}
+function toggleDone(j,enc){
+  var k=curDay+'_'+j;done[k]=!done[k];saveDone();renderTabs();renderDay();
+  if(done[k])startTimer(decodeURIComponent(enc));
+}
+function openEditPanel(){var p=document.getElementById('editPanel');p.style.display='block';document.getElementById('planTxt').value='';document.getElementById('planTxt').focus();}
+document.getElementById('editBtn').onclick=function(){var p=document.getElementById('editPanel');if(p.style.display==='block'){p.style.display='none';return;}openEditPanel();};
+
+/* INIT */
+try{localStorage.removeItem('gym_plan');localStorage.removeItem('gym_plan_ver');}catch(e){}
+var stored='';try{stored=localStorage.getItem(STORAGE_KEY)||'';}catch(e){}
+if(stored){try{var p3=JSON.parse(stored);if(p3&&p3.length&&p3[0].exercises&&p3[0].exercises.length){plan=p3.map(function(d,i){var lb=makeLabels(d.fullName||'',i);return{fullName:lb.full,sh:lb.sh,tabDescription:d.tabDescription||'',exercises:d.exercises||[]};});}}catch(e){}}
+setLang(curLang);
+
+/* PWA */
+(function(){
+  var manifest={name:'GYM PRO',short_name:'GYM PRO',description:'Smart Workout App v2',start_url:'.',display:'standalone',background_color:'#0d0f1a',theme_color:'#0d0f1a',orientation:'portrait',icons:[
+    {src:'data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192"><rect width="192" height="192" rx="40" fill="#0d0f1a"/><text x="50%" y="54%" dominant-baseline="middle" text-anchor="middle" font-family="Impact,sans-serif" font-size="72" fill="#818cf8">GYM</text><text x="50%" y="80%" dominant-baseline="middle" text-anchor="middle" font-family="Impact,sans-serif" font-size="36" fill="#818cf8">PRO</text></svg>'),sizes:'192x192',type:'image/svg+xml',purpose:'any maskable'},
+    {src:'data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" rx="100" fill="#0d0f1a"/><text x="50%" y="52%" dominant-baseline="middle" text-anchor="middle" font-family="Impact,sans-serif" font-size="180" fill="#818cf8">GYM</text><text x="50%" y="80%" dominant-baseline="middle" text-anchor="middle" font-family="Impact,sans-serif" font-size="90" fill="#818cf8">PRO</text></svg>'),sizes:'512x512',type:'image/svg+xml',purpose:'any maskable'}
+  ]};
+  var blob=new Blob([JSON.stringify(manifest)],{type:'application/json'});
+  document.getElementById('manifestLink').href=URL.createObjectURL(blob);
+})();
+if('serviceWorker' in navigator){
+  var swCode=["var CACHE='gym-pro-v2-app';","self.addEventListener('install',function(e){e.waitUntil(caches.open(CACHE).then(function(c){return c.addAll(['./']);}));self.skipWaiting();});","self.addEventListener('activate',function(e){e.waitUntil(caches.keys().then(function(keys){return Promise.all(keys.filter(function(k){return k!==CACHE;}).map(function(k){return caches.delete(k);}));}));self.clients.claim();});","self.addEventListener('fetch',function(e){e.respondWith(caches.match(e.request).then(function(r){return r||fetch(e.request).catch(function(){return caches.match('./');});}));});"].join('\n');
+  var swBlob=new Blob([swCode],{type:'text/javascript'});
+  navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(function(){});
+}
+var deferredPrompt=null;
+window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();deferredPrompt=e;showInstallBanner();});
+function showInstallBanner(){
+  if(document.getElementById('installBanner'))return;
+  var b=document.createElement('div');b.id='installBanner';
+  b.style.cssText='position:fixed;bottom:0;left:0;right:0;background:#111422;border-top:1px solid rgba(129,140,248,0.2);padding:14px 16px;display:flex;align-items:center;gap:12px;z-index:999;';
+  b.innerHTML='<div style="flex:1"><div style="font-weight:700;color:#e2e8f0;font-size:14px">'+T.installTitle+'</div><div style="font-size:12px;color:#64748b;margin-top:2px">'+T.installSub+'</div></div><button onclick="doInstall()" style="background:#818cf8;color:#fff;border:none;padding:10px 18px;border-radius:10px;font-weight:700;font-size:14px;cursor:pointer;font-family:Heebo,Arial,sans-serif">'+T.installBtn+'</button><button onclick="dismissBanner()" style="background:transparent;border:none;color:#64748b;font-size:20px;cursor:pointer;padding:4px 8px">✕</button>';
+  document.body.appendChild(b);
+}
+function doInstall(){if(!deferredPrompt)return;deferredPrompt.prompt();deferredPrompt.userChoice.then(function(){deferredPrompt=null;dismissBanner();});}
+function dismissBanner(){var b=document.getElementById('installBanner');if(b)b.remove();}
+</script>
+</body>
+</html>
