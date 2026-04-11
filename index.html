@@ -61,7 +61,7 @@ body.ltr .edit-panel textarea{direction:ltr}
 
 /* Progress */
 .progress-wrap{padding:12px 16px 8px}
-.prog-label{font-size:12px;color:var(--muted);margin-bottom:6px;display:flex;justify-content:space-between}
+.prog-label{font-size:16px;color:var(--muted);margin-bottom:6px;display:flex;justify-content:space-between}
 .prog-bar{height:3px;background:#1e2030;border-radius:2px;overflow:hidden}
 .prog-fill{height:100%;background:var(--accent);transition:width .4s;border-radius:2px}
 
@@ -71,7 +71,6 @@ body.ltr .edit-panel textarea{direction:ltr}
 /* Exercise card */
 .ex-row{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;transition:border-color .2s}
 .ex-row.done{opacity:.55;filter:grayscale(.3)}
-.ex-row.done .ex-footer{display:none}
 .ex-row.superset{border-color:rgba(251,191,36,0.3)}
 .ex-row.power-week{border-color:rgba(251,146,60,0.3)}
 
@@ -80,7 +79,7 @@ body.ltr .edit-panel textarea{direction:ltr}
 .ex-num{font-family:'Bebas Neue',Impact,sans-serif;font-size:22px;color:rgba(129,140,248,0.2);min-width:26px;text-align:center;flex-shrink:0;line-height:1.1;padding-top:2px}
 .ex-info{flex:1;min-width:0}
 .ex-name{font-size:15px;font-weight:700;color:var(--text);margin-bottom:8px;line-height:1.3;word-break:break-word;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
-.ex-meta{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.ex-meta{display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding-bottom:14px}
 .badge{background:var(--accent-dim);border:1px solid var(--accent-border);border-radius:20px;padding:3px 11px;font-size:12px;color:#94a3b8;white-space:nowrap;line-height:1.4}
 .badge b{color:var(--accent)}
 .cat-badge{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:20px;padding:3px 11px;font-size:12px;color:#475569;line-height:1.4}
@@ -92,9 +91,9 @@ body.ltr .edit-panel textarea{direction:ltr}
 body.ltr .power-note{border-right:none;border-left:2px solid #fb923c}
 .power-week .power-note{display:block}
 
-/* Card footer — buttons in a row */
+/* Card footer */
 .ex-footer{display:flex;gap:8px;padding:10px 16px 14px;border-top:1px solid var(--border)}
-.check-btn{flex:1;background:var(--accent-dim);border:1px solid var(--accent-border);color:var(--accent);padding:9px 12px;border-radius:10px;cursor:pointer;font-size:13px;font-weight:700;font-family:'Heebo',Arial,sans-serif;min-height:42px;text-align:center;transition:.15s}
+.check-btn{background:var(--accent-dim);border:1px solid var(--accent-border);color:var(--accent);padding:9px 12px;border-radius:10px;cursor:pointer;font-size:13px;font-weight:700;font-family:'Heebo',Arial,sans-serif;min-height:42px;min-width:46px;text-align:center;transition:.15s;display:flex;align-items:center;justify-content:center}
 .check-btn:active{background:var(--accent);color:#fff}
 .check-btn.done-state{background:rgba(52,211,153,0.06);color:rgba(52,211,153,0.45);border-color:rgba(52,211,153,0.15);font-size:12px}
 .hist-btn{background:rgba(129,140,248,0.06);border:1px solid var(--border);color:var(--muted);padding:9px 14px;border-radius:10px;cursor:pointer;font-size:17px;min-height:42px;min-width:46px;display:flex;align-items:center;justify-content:center;transition:.15s}
@@ -160,6 +159,8 @@ body.ltr .week-bar-label{margin-right:auto;margin-left:0}
 .menu-dots{display:flex;flex-direction:column;gap:3px;pointer-events:none}
 .menu-dots span{width:4px;height:4px;border-radius:50%;background:currentColor;display:block}
 .dropdown-menu{display:none;position:absolute;top:44px;right:0;background:#111422;border:1px solid var(--border);border-radius:12px;padding:8px;min-width:160px;z-index:200;flex-direction:column;gap:6px}
+body.rtl .dropdown-menu{right:auto;left:0}
+body.ltr .dropdown-menu{left:auto;right:0}
 .dropdown-menu.open{display:flex}
 .lang-toggle-row{display:flex;gap:0;border-radius:20px;overflow:hidden;border:1px solid var(--border);background:var(--card2)}
 .lang-toggle-row button{padding:6px 14px;border:none;background:transparent;color:var(--muted);font-size:12px;font-weight:700;font-family:'Heebo',Arial,sans-serif;cursor:pointer;transition:.15s}
@@ -179,7 +180,7 @@ body.ltr .week-bar-label{margin-right:auto;margin-left:0}
             <button id="btnHE" class="active" onclick="event.stopPropagation();setLang('he')">HE</button>
             <button id="btnEN" onclick="event.stopPropagation();setLang('en')">EN</button>
           </div>
-          <button class="edit-btn del-plan-btn" id="deletePlanBtn" style="display:none;width:100%" onclick="event.stopPropagation();deletePlan()"></button>
+          <button class="edit-btn del-plan-btn" id="deletePlanBtn" style="display:none;width:100%" onclick="deletePlan(event)"></button>
         </div>
       </div>
     </div>
@@ -239,8 +240,8 @@ var LANG={
     histTitle:'היסטוריית משקלים',histMax:'מקסימום',histLast:'אחרון',histSess:'אימונים',
     histEmpty:'אין היסטוריה עדיין.\nתתחיל לתעד משקלים!',
     installTitle:'📲 הוסף למסך הבית',installSub:'גש ל-GYM PRO ישירות כמו אפליקציה',installBtn:'התקן',
-    hintHTML:'<b>מבנה כל בלוק (מופרד בשורה ריקה כפולה):</b><br>שורה 1 → <b>שם הטאב</b><br>שורה 2 → <b>תיאור</b><br>שורות 3+ → <b>תרגילים</b> (מתחילים ב-* או מספר)<br>פורמט: <b>שם: X סטים, Y חזרות</b><br>שורת <b>סופר-סט</b> מקבצת תרגילים בצהוב',
-    placeholder:'אימון A — חזה + רגליים\nאימון משלב כוח\n* בנץ פרס: 4 סטים, 8-10 חזרות\n* סקוואט: 4 סטים, 6 חזרות\n\nאימון B — זרועות\nסופר-סט לזרועות\nסופר-סט\n* כפיפת מרפקים: 3 סטים, 10-12 חזרות\n* פשיטת מרפקים: 3 סטים, 10-12 חזרות'
+    hintHTML:'<b>פורמטים נתמכים:</b><br>• <b>שם: X סטים, Y חזרות</b><br>• <b>שם — X×Y</b> או <b>שם X×Y</b><br>• <b>שם (X×Y)</b> או <b>שם | X סטים</b><br>• טקסט חופשי עם מספרים: <b>בנץ 4x10</b><br>• שורה עם כוכבית/מספר/מקף לפני השם<br>• <b>סופר-סט</b> בשורה נפרדת לפני תרגיל',
+    placeholder:'אימון A — חזה + רגליים\nאימון משלב כוח\n* בנץ פרס: 4 סטים, 8-10 חזרות\n* סקוואט 4x6\n\nאימון B — זרועות\nסופר-סט לזרועות\nסופר-סט\n* כפיפת מרפקים: 3 סטים, 10-12 חזרות\n* פשיטת מרפקים: 3 סטים, 10-12 חזרות'
   },
   en:{
     editBtn:'Edit Plan',openPlan:'📂 Load Plan',loadBtn:'📂 Load Plan',deleteBtn:'🗑️ Clear',
@@ -252,8 +253,8 @@ var LANG={
     histTitle:'Weight History',histMax:'Max',histLast:'Last',histSess:'Sessions',
     histEmpty:'No history yet.\nStart tracking weights!',
     installTitle:'📲 Add to Home Screen',installSub:'Access GYM PRO like a native app',installBtn:'Install',
-    hintHTML:'<b>Block structure (separated by double blank line):</b><br>Line 1 → <b>Tab name</b><br>Line 2 → <b>Description</b><br>Lines 3+ → <b>Exercises</b> (starting with * or number)<br>Format: <b>Name: X sets, Y reps</b><br>A <b>superset</b> line groups exercises in gold',
-    placeholder:'Workout A — Chest + Legs\nCombined strength session\n* Bench Press: 4 sets, 8-10 reps\n* Squat: 4 sets, 6 reps\n\nWorkout B — Arms\nSuperset for arms\nsuperset\n* Bicep Curl: 3 sets, 10-12 reps\n* Tricep Extension: 3 sets, 10-12 reps'
+    hintHTML:'<b>Supported formats:</b><br>• <b>Name: X sets, Y reps</b><br>• <b>Name — X×Y</b> or <b>Name X×Y</b><br>• <b>Name (X×Y)</b> or <b>Name | X sets</b><br>• Free text with numbers: <b>Bench 4x10</b><br>• Lines starting with bullet/number/dash<br>• <b>superset</b> on its own line before an exercise',
+    placeholder:'Workout A — Chest + Legs\nCombined strength session\n* Bench Press: 4 sets, 8-10 reps\n* Squat 4x6\n\nWorkout B — Arms\nSuperset for arms\nsuperset\n* Bicep Curl: 3 sets, 10-12 reps\n* Tricep Extension: 3 sets, 10-12 reps'
   }
 };
 var curLang='he';try{curLang=localStorage.getItem('gym_lang')||'he';}catch(e){}
@@ -287,63 +288,179 @@ var MMAP=[
 ];
 function guesscat(n){for(var i=0;i<MMAP.length;i++)if(MMAP[i][0].test(n))return MMAP[i][1];return null;}
 
+/* =====================================================================
+   UPGRADED PARSER — supports all text formats, same display output
+   ===================================================================== */
+
+/**
+ * cleanRawText — light cleanup only, no aggressive filtering
+ * Preserves original structure; just trims lines and removes table artifacts
+ */
 function cleanRawText(text){
   if(!text)return'';
-  var lines=text.split('\n').map(function(l){return l.trim();}).filter(function(l){return l&&!l.includes('____')&&!l.includes('פרמטר')&&!l.includes('עצימות (RIR)');});
-  var processed=[];
-  lines.forEach(function(line){
-    var l=line.replace(/בשבועות\s*1-3/g,'שבועות 1–3').replace(/שבועות\s*4[,\/]\s*8/g,'שבוע 4/8').replace(/בשבועות\s*4\s*ו-8/g,'שבוע 4/8');
-    var isHeader=/אימון\s+[A-C]/i.test(l)||/[💪🦵💡⚡]/.test(l);
-    processed.push(isHeader?'\n\n'+l:l);
-  });
-  return processed.join('\n').trim();
+  // Preserve blank lines — they are block separators for parseWorkout
+  // Only strip known template artifacts
+  return text.split('\n')
+    .map(function(l){return l.trim();})
+    .filter(function(l){
+      if(/^[_\-=]{4,}$/.test(l))return false;
+      if(/פרמטר\s*\|/.test(l))return false;
+      if(/עצימות\s*\(RIR\)/.test(l))return false;
+      return true; // keep empty lines as block separators
+    })
+    .join('\n');
 }
+
+/**
+ * parseWorkout — split into tab blocks, then parse each block
+ */
 function parseWorkout(text){
-  var blocks=text.split(/\n{2,}/);var workouts=[];var fi=0;
+  // Split on 2+ blank lines
+  var blocks=text.split(/\n{2,}/);
+  var workouts=[],fi=0;
   blocks.forEach(function(block){
     var lines=block.split('\n').map(function(l){return l.trim();}).filter(function(l){return l!=='';});
     if(lines.length<1)return;
-    var tabName=lines[0].replace(/[💪🦵💡⚡]/g,'').trim();
-    var exercises=[];var descriptionLines=[];var isSupersetMode=false;
+    var tabName=lines[0].replace(/[💪🦵💡⚡🔥✅→►▶]/g,'').trim();
+    var exercises=[],descriptionLines=[],isSupersetMode=false;
     for(var i=1;i<lines.length;i++){
       var cl=lines[i];
-      if(/סופר-סט|superset/i.test(cl)){isSupersetMode=true;continue;}
-      var isEx=/^[\d•*\-◦●·]/.test(cl)||/סטים|חזרות|sets|reps/i.test(cl);
-      var isDesc=i===1&&exercises.length===0&&!/^[\d•*\-◦●·]/.test(cl)&&!/סטים|חזרות|sets|reps/i.test(cl);
-      if(isDesc){descriptionLines.push(cl);}
-      else if(isEx){var card=createExerciseCard(cl,isSupersetMode);if(card){exercises.push(card);isSupersetMode=false;}}
-      else{
-        var card2=createExerciseCard('* '+cl,isSupersetMode);
-        if(card2){exercises.push(card2);isSupersetMode=false;}
-        else{descriptionLines.push(cl);}
-      }
+      // Superset marker
+      if(/^(סופר-?סט|superset)$/i.test(cl)){isSupersetMode=true;continue;}
+      // First line after tab name with no exercises yet and no bullet/number → description
+      var hasBulletOrNum=/^[💪🦵✅▶►→•·◦●\*\-–—]/.test(cl)||/^\d+[\.\)\-:\s]/.test(cl)||/^[א-וא-ת][\.\)]/.test(cl);
+      var hasSetRep=/\d+\s*(?:סטים|sets?|חזרות|reps?)/i.test(cl)||/\d+\s*[xX×]\s*\d+/.test(cl);
+      if(i===1&&exercises.length===0&&!hasBulletOrNum&&!hasSetRep){descriptionLines.push(cl);continue;}
+      var card=createExerciseCard(cl,isSupersetMode);
+      if(card){exercises.push(card);isSupersetMode=false;}
+      else if(exercises.length===0){descriptionLines.push(cl);}
     }
-    if(exercises.length>0){var lb=makeLabels(tabName,fi++);workouts.push({fullName:lb.full,sh:lb.sh,tabDescription:descriptionLines.join(' | '),exercises:exercises});}
+    if(exercises.length>0){
+      var lb=makeLabels(tabName,fi++);
+      workouts.push({fullName:lb.full,sh:lb.sh,tabDescription:descriptionLines.join(' | '),exercises:exercises});
+    }
   });
   return workouts;
 }
-function createExerciseCard(exerciseLine,isSuperset){
-  var hasBullet=/^[\*\-•◦●·]/.test(exerciseLine);
-  var hasNumbered=/^\d+[\.\)\-\s]/.test(exerciseLine)||/^[א-ו][\.\)]/.test(exerciseLine);
-  var hasByContent=/\d+\s*(?:סטים|sets?)/i.test(exerciseLine)&&/(?:חזרות|reps?)/i.test(exerciseLine);
-  if(!hasBullet&&!hasNumbered&&!hasByContent)return null;
-  var clean=exerciseLine.replace(/^[\*\-•◦●·\s]+/,'').replace(/^\d+[\.\)\-\s]+/,'').replace(/^[א-ו][\.\)]\s*/,'').trim();
+
+/**
+ * createExerciseCard — the upgraded core
+ *
+ * Supported input patterns:
+ *   1.  * Name: X סטים, Y חזרות          (original Hebrew)
+ *   2.  * Name: X sets, Y reps            (original English)
+ *   3.  * Name — X×Y  /  Name - XxY      (dash + multiplier)
+ *   4.  * Name X×Y  /  Name 4x10         (space + multiplier at end)
+ *   5.  * Name (X×Y)  /  Name (X sets)   (parentheses)
+ *   6.  * Name | X סטים Y חזרות           (pipe separator)
+ *   7.  Name X סטים של Y חזרות            (Hebrew inline)
+ *   8.  Name X sets of Y reps             (English inline)
+ *   9.  Inline: contains "X סטים" anywhere / "X sets" anywhere
+ *   10. Bullet/numbered line with name only → defaults 3×10
+ *   11. Plain text line that contains a known exercise pattern
+ */
+function createExerciseCard(line,isSuperset){
+  var orig=line.trim();
+  if(!orig||orig.length<2)return null;
+
+  // Strip leading bullet / number / emoji decoration
+  var clean=orig
+    .replace(/^[💪🦵✅▶►→•·◦●]\s*/,'')
+    .replace(/^[\*\-–—]\s*/,'')
+    .replace(/^\d+[\.\)\-:\s]+/,'')
+    .replace(/^[א-וא-ת][\.\)]\s*/,'')
+    .trim();
+
   if(!clean||clean.length<2)return null;
-  var name=clean,sets='3',reps='10',m;
-  m=clean.match(/^(.+?):\s*(\d+)\s*סטים,?\s*([\d–\-]+)\s*חזרות/i);if(m){name=m[1].trim();sets=m[2];reps=m[3];}
-  if(name===clean){m=clean.match(/^(.+?):\s*(\d+)\s*sets?,?\s*([\d\-]+)\s*reps?/i);if(m){name=m[1].trim();sets=m[2];reps=m[3];}}
-  if(name===clean){m=clean.match(/^(.+?)\s+(\d+)\s*[xX×*]\s*([\d\-]+)\s*$/i);if(m){name=m[1].trim();sets=m[2];reps=m[3];}}
-  if(name===clean){m=clean.match(/^(.+?)\s+(\d+)\s*סטים\s*(?:של\s*)?([\d–\-]+)\s*חזרות/);if(m){name=m[1].trim();sets=m[2];reps=m[3].replace('–','-');}}
-  if(name===clean){m=clean.match(/^(.+?)\s+(\d+)\s*sets?\s+(?:of\s*)?([\d\-]+)\s*reps?/i);if(m){name=m[1].trim();sets=m[2];reps=m[3];}}
-  if(name===clean&&hasByContent){m=clean.match(/^([^.]+)\./);if(m)name=m[1].trim();var ms=clean.match(/(\d+)\s*סטים/),mr=clean.match(/([\d–\-]+)\s*חזרות/);if(ms)sets=ms[1];if(mr)reps=mr[1].replace('–','-');}
-  name=name.replace(/[;:,]\s*(?:שבועות?\s*[\d–\-\/,]+.*)?$/i,'').trim();
+
+  var hasBullet=/^[💪🦵✅▶►→•·◦●\*\-–—]/.test(orig);
+  var hasNumber=/^\d+[\.\)\-:\s]/.test(orig)||/^[א-ו][\.\)]/.test(orig);
+
+  var name=clean,sets='3',reps='10',matched=false,m;
+
+  // ── WEEK VARIANTS (check first, extract before other patterns strip the text) ──
+  var mw1=clean.match(/(?:שבועות?\s*1[-–]3|weeks?\s*1[-–]3)[^\d]*(\d+)\s*(?:סטים|sets?)[^\d]*([\d–\-]+)\s*(?:חזרות|reps?)/i);
+  var mw4=clean.match(/(?:שבוע?\s*(?:4|8|4[\/,]\s*8)|weeks?\s*(?:4|8))[^\d]*(\d+)\s*(?:סטים|sets?)[^\d]*([\d–\-]+)\s*(?:חזרות|reps?)/i);
+
+  // ── PATTERN 1: "Name: X סטים, Y חזרות" ──
+  m=clean.match(/^(.+?):\s*(\d+)\s*(?:סטים|sets?)[,\s]+\s*([\d–\-]+)\s*(?:חזרות|reps?)/i);
+  if(!matched&&m){name=m[1].trim();sets=m[2];reps=m[3];matched=true;}
+
+  // ── PATTERN 2: "Name — X×Y" or "Name – X×Y" (dash then mult) ──
+  if(!matched){m=clean.match(/^(.+?)\s*[—–]\s*(\d+)\s*[xX×]\s*([\d\-–]+)\s*$/);if(m){name=m[1].trim();sets=m[2];reps=m[3];matched=true;}}
+
+  // ── PATTERN 3: "Name - X×Y" (hyphen then mult, end of string) ──
+  if(!matched){m=clean.match(/^(.+?)\s+-\s+(\d+)\s*[xX×]\s*([\d\-–]+)\s*$/);if(m){name=m[1].trim();sets=m[2];reps=m[3];matched=true;}}
+
+  // ── PATTERN 4: "Name (X×Y)" ──
+  if(!matched){m=clean.match(/^(.+?)\s*\((\d+)\s*[xX×]\s*([\d\-–]+)\)/);if(m){name=m[1].trim();sets=m[2];reps=m[3];matched=true;}}
+
+  // ── PATTERN 5: "Name | X סטים Y חזרות" or "Name | X×Y" ──
+  if(!matched){m=clean.match(/^(.+?)\s*\|\s*(\d+)\s*[xX×]\s*([\d\-–]+)/);if(m){name=m[1].trim();sets=m[2];reps=m[3];matched=true;}}
+  if(!matched){m=clean.match(/^(.+?)\s*\|\s*(\d+)\s*(?:סטים|sets?)[,\s]+([\d\-–]+)\s*(?:חזרות|reps?)/i);if(m){name=m[1].trim();sets=m[2];reps=m[3];matched=true;}}
+
+  // ── PATTERN 6: "Name X×Y" (space + mult at end, no other separator) ──
+  if(!matched){m=clean.match(/^(.+?)\s+(\d+)\s*[xX×]\s*([\d\-–]+)\s*$/);if(m){name=m[1].trim();sets=m[2];reps=m[3];matched=true;}}
+
+  // ── PATTERN 7: "Name X sets of Y" / "Name X סטים של Y חזרות" ──
+  if(!matched){m=clean.match(/^(.+?)\s+(\d+)\s*sets?\s+(?:of\s*)?([\d\-–]+)\s*reps?/i);if(m){name=m[1].trim();sets=m[2];reps=m[3];matched=true;}}
+  if(!matched){m=clean.match(/^(.+?)\s+(\d+)\s*סטים\s*(?:של\s*)?([\d–\-]+)\s*חזרות/);if(m){name=m[1].trim();sets=m[2];reps=m[3].replace('–','-');matched=true;}}
+
+  // ── PATTERN 8: loose — "sets" and "reps" keywords anywhere ──
+  if(!matched){
+    var ms=clean.match(/(\d+)\s*(?:סטים|sets?)/i);
+    var mr=clean.match(/([\d–\-]+)\s*(?:חזרות|reps?)/i);
+    if(ms||mr){
+      // Name = text before first numeric-sets/reps mention
+      var nameEnd=clean.search(/\d+\s*(?:סטים|sets?|חזרות|reps?)/i);
+      if(nameEnd>2){name=clean.substring(0,nameEnd).replace(/[\s:\-,|]+$/,'').trim();}
+      else{name=clean.replace(/\d+\s*(?:סטים|sets?|[xX×]|חזרות|reps?).*/i,'').replace(/[\s:\-,|]+$/,'').trim();}
+      if(ms)sets=ms[1];
+      if(mr)reps=mr[1].replace('–','-');
+      if(name.length>1)matched=true;
+    }
+  }
+
+  // ── PATTERN 9: has bullet/number → exercise with default sets/reps ──
+  if(!matched&&(hasBullet||hasNumber)){name=clean;matched=true;}
+
+  // ── PATTERN 10: plain text that looks like a short exercise name ──
+  // Only if line is short, not a sentence, and not a description
+  if(!matched&&clean.length<=50&&!/[.!?]$/.test(clean)&&!/^[A-Z][a-z].*\s[a-z].*\s[a-z]/.test(clean)){
+    // Avoid grabbing obvious description sentences
+    var wordCount=clean.split(/\s+/).length;
+    if(wordCount<=5){name=clean;matched=true;}
+  }
+
+  if(!matched)return null;
+
+  // ── Clean up name ──
+  name=name
+    .replace(/[;:,|]+$/,'')          // trailing punctuation
+    .replace(/\s*\(.*?\)\s*$/,'')    // trailing parenthetical
+    .replace(/\s*[—–\-]+\s*$/,'')    // trailing dash
+    .replace(/\s{2,}/g,' ')
+    .trim();
+
   if(!name||name.length<2)return null;
+
+  // ── Week variants ──
   var weekVariants=null;
-  var mw1=clean.match(/(?:שבועות\s*1[-–]3|weeks?\s*1[-–]3)[^;|]*?(\d+)\s*(?:סטים|sets?)[^;|]*?([\d–\-]+)\s*(?:חזרות|reps?)/i);
-  var mw4=clean.match(/(?:שבוע\s*(?:4|8|4[\/,]\s*8)|weeks?\s*(?:4|8|4[\/,]\s*8))[^;|]*?(\d+)\s*(?:סטים|sets?)[^;|]*?([\d–\-]+)\s*(?:חזרות|reps?)/i);
-  if(mw1||mw4){weekVariants={w1:mw1?{sets:mw1[1],reps:mw1[2]}:{sets:sets,reps:reps},w4:mw4?{sets:mw4[1],reps:mw4[2]}:{sets:sets,reps:reps}};if(mw1){sets=mw1[1];reps=mw1[2];}}
+  if(mw1||mw4){
+    weekVariants={
+      w1:mw1?{sets:mw1[1],reps:mw1[2]}:{sets:sets,reps:reps},
+      w4:mw4?{sets:mw4[1],reps:mw4[2]}:{sets:sets,reps:reps}
+    };
+    if(mw1){sets=mw1[1];reps=mw1[2];}
+  }
+
   return{name:name,sets:sets,reps:reps,cat:guesscat(name),isSuperset:!!isSuperset,weekVariants:weekVariants};
 }
+
+/* =====================================================================
+   END OF UPGRADED PARSER
+   ===================================================================== */
+
 var AB_KW=['בטן','פלאנק','crunch','plank','ab ','abs','leg raise','sit up'];
 function isAb(n){return AB_KW.some(function(k){return n.toLowerCase().indexOf(k)>=0;});}
 function buildOpts(s){var o='<option value="">'+T.weightOpt+'</option>';for(var w=5;w<=200;w+=5)o+='<option value="'+w+'"'+(s==w?' selected':'')+'>'+w+' kg</option>';return o;}
@@ -460,7 +577,6 @@ function beep(){try{var ac=new(window.AudioContext||window.webkitAudioContext)()
 function updateUI(){
   var hasPlan=plan.length>0;
   var eb=document.getElementById('editBtn'),pa=document.getElementById('panelActions');
-  /* SVG pencil - no text override */
   var dpb=document.getElementById('deletePlanBtn');if(dpb){dpb.textContent=T.deleteBtn;dpb.style.display=hasPlan?'':'none';}
   eb.className='edit-btn'+(hasPlan?'':' no-plan');
   if(hasPlan){pa.innerHTML='<button class="load-btn" onclick="doLoad()">'+T.loadBtn+'</button><button class="delete-btn" onclick="document.getElementById(\'planTxt\').value=\'\';document.getElementById(\'planTxt\').focus()">'+T.deleteBtn+'</button>';}
@@ -482,6 +598,81 @@ function onWeightChange(d,j,val,eName){
   var sel=document.getElementById('ws_'+d+'_'+j);
   if(sel)sel.className='weight-select'+(val?' picked':'');
 }
+/* Category → emoji map */
+var CAT_ICON={
+  'חזה':'🏋️','Chest':'🏋️',
+  'רגליים':'🦵','Legs':'🦵',
+  'גב':'🧗','Back':'🧗',
+  'כתפיים':'🤸','Shoulders':'🤸',
+  'ביספס':'💪','Biceps':'💪',
+  'טריספס':'💪','Triceps':'💪',
+  'שוקיים':'🦵','Calves':'🦵',
+  'בטן':'🔥','Core':'🔥'
+};
+function getCatIcons(exercises){
+  var seen={},icons=[];
+  exercises.forEach(function(ex){
+    if(!ex.cat)return;
+    var key=curLang==='he'?ex.cat.he:ex.cat.en;
+    var icon=CAT_ICON[key]||CAT_ICON[ex.cat.he]||'';
+    if(icon&&!seen[icon]){seen[icon]=1;icons.push(icon);}
+  });
+  return icons.slice(0,4).join('');
+}
+
+var HEB_LETTERS=['א','ב','ג','ד','ה','ו','ז','ח','ט','י'];
+
+var DAY_MAP_HE=[
+  {k:'ראשון',s:'ראשון'},{k:'שני',s:'שני'},{k:'שלישי',s:'שלישי'},
+  {k:'רביעי',s:'רביעי'},{k:'חמישי',s:'חמישי'},{k:'שישי',s:'שישי'},{k:'שבת',s:'שבת'}
+];
+var DAY_MAP_EN=[
+  {k:'sunday',s:'Sun'},{k:'monday',s:'Mon'},{k:'tuesday',s:'Tue'},
+  {k:'wednesday',s:'Wed'},{k:'thursday',s:'Thu'},{k:'friday',s:'Fri'},{k:'saturday',s:'Sat'}
+];
+
+/* safe short form — remove dash separators, truncate, strip special chars */
+function toShort(name, maxLen){
+  var s=name.replace(/\s*[—–]\s*/g,' ').replace(/[()[\]{}|]/g,'').replace(/\s{2,}/g,' ').trim();
+  return s.length>maxLen?s.slice(0,maxLen-1)+'…':s;
+}
+
+/* returns {label:string, isDay:boolean} */
+function getTabMeta(fullName, exercises){
+  var n=fullName.trim(), nl=n.toLowerCase();
+
+  // 1. Hebrew day — only day (optionally prefixed "יום")
+  for(var i=0;i<DAY_MAP_HE.length;i++){
+    var dk=DAY_MAP_HE[i].k, ds=DAY_MAP_HE[i].s;
+    if(n.indexOf(dk)<0) continue;
+    // strip "יום", the day word, dashes, spaces — anything left?
+    var rest=n.replace('יום','').replace(dk,'').replace(/[\s—–\-]/g,'').trim();
+    return {label: rest===''?ds:toShort(n,13), isDay:true};
+  }
+
+  // 2. English day — only day (optionally prefixed "day")
+  for(var i=0;i<DAY_MAP_EN.length;i++){
+    var dk2=DAY_MAP_EN[i].k, ds2=DAY_MAP_EN[i].s;
+    if(nl.indexOf(dk2)<0) continue;
+    // strip the day word itself, "day" prefix, dashes, spaces
+    var rest2=nl.replace(dk2,'').replace(/\bday\b/,'').replace(/[\s—–\-]/g,'').trim();
+    return {label: rest2===''?ds2:toShort(n,13), isDay:true};
+  }
+
+  // 3. Sequential letter/number — A/B/C or 1/2/3 or standalone Hebrew letter
+  var seqHe=/(?:^|\s)[א-י](?:\s|$)/.test(n); // single aleph-bet letter as standalone word
+  var seqLat=/\b[A-Z]\b/.test(n);             // single uppercase Latin letter
+  var seqNum=/\b\d+\b/.test(n);               // standalone number
+  if(seqHe||seqLat||seqNum){
+    var part=n.split(/\s*[—–]\s*/)[0].trim();
+    return {label:toShort(part,11), isDay:false};
+  }
+
+  // 4. Muscle icons
+  var icons=getCatIcons(exercises);
+  return {label: icons||toShort(n,5), isDay:false};
+}
+
 function renderTabs(){
   var el=document.getElementById('tabs');if(!plan.length){el.innerHTML='';return;}
   var html='';
@@ -489,7 +680,11 @@ function renderTabs(){
     var d=plan[i],total=d.exercises.length,dc=0;
     for(var j=0;j<d.exercises.length;j++){if(done[i+'_'+j])dc++;}
     var prog=dc>0?'<span style="display:block;color:var(--accent);font-size:10px;margin-top:2px">'+dc+'/'+total+'</span>':'';
-    html+='<div class="tab'+(i===curDay?' active':'')+'" onclick="switchDay('+i+')" title="'+d.fullName+'"><span class="tab-label">'+d.fullName+'</span>'+prog+'</div>';
+    var meta=getTabMeta(d.fullName,d.exercises);
+    var icons=getCatIcons(d.exercises);
+    var iconsHtml=(meta.isDay||/\p{Emoji}/u.test(meta.label))?'':
+      (icons?'<span style="display:block;font-size:12px;line-height:1.4;margin-top:1px">'+icons+'</span>':'');
+    html+='<div class="tab'+(i===curDay?' active':'')+'" onclick="switchDay('+i+')" title="'+d.fullName+'"><span class="tab-label">'+meta.label+'</span>'+iconsHtml+prog+'</div>';
   }
   el.innerHTML=html;
 }
@@ -505,7 +700,7 @@ function renderDay(){
   var pct=total?Math.round(dc/total*100):0;
   var hasWeekVar=exercises.some(function(e){return e.weekVariants;});
   var weekMode=weekModes[curDay]||'w1';
-  var html='<div class="progress-wrap"><div class="prog-label"><span style="font-weight:500;color:var(--text);font-size:16px">'+day.fullName+'</span><span>'+dc+'/'+total+' '+T.exs+'</span></div><div class="prog-bar"><div class="prog-fill" style="width:'+pct+'%"></div></div></div>';
+  var html='<div class="progress-wrap"><div class="prog-label"><span style="font-weight:700;color:var(--text)">'+day.fullName+'</span><span>'+dc+'/'+total+' '+T.exs+'</span></div><div class="prog-bar"><div class="prog-fill" style="width:'+pct+'%"></div></div></div>';
   if(day.tabDescription)html+='<div class="day-desc">'+day.tabDescription+'</div>';
   if(hasWeekVar){html+='<div class="week-bar"><div class="week-seg"><button onclick="setWeekMode(\'w1\')" class="'+(weekMode==='w1'?'active':'')+'">'+T.week13+'</button><button onclick="setWeekMode(\'w4\')" class="'+(weekMode==='w4'?'active':'')+'">'+T.week4+'</button></div><span class="week-bar-label">'+(weekMode==='w4'?T.weekPower:T.weekNormal)+'</span></div>';}
   html+='<div class="ex-list">';
@@ -527,14 +722,16 @@ function renderDay(){
       +'<div class="ex-top"><div class="ex-num">'+(j+1)+'</div>'
       +'<div class="ex-info">'
         +'<div class="ex-name">'+ex.name+(catLabel?' <span class="cat-badge">'+catLabel+'</span>':'')+' '+ssTag+'</div>'
-        +'<div class="ex-meta"><div class="badge">'+T.setsLabel+'<b>'+dispSets+'</b></div><div class="badge">'+T.repsLabel+'<b>'+dispReps+'</b></div>'+wB+'</div>'
+        +'<div class="ex-meta">'
+          +'<div class="badge">'+T.setsLabel+'<b>'+dispSets+'</b></div>'
+          +'<div class="badge">'+T.repsLabel+'<b>'+dispReps+'</b></div>'
+          +wB
+          +'<button class="hist-btn" onclick="openHistModal(\''+enc+'\')" title="History">&#128200;</button>'
+          +'<a class="yt-btn" href="'+ytUrl+'" target="_blank" title="YouTube">'+YT_SVG+'</a>'
+          +'<button class="check-btn'+(isDone?' done-state':'')+'" id="cb_'+j+'" onclick="toggleDone('+j+',\''+enc+'\')">'+(isDone?T.completed:T.done)+'</button>'
+        +'</div>'
         +pNote
       +'</div></div>'
-      +'<div class="ex-footer">'
-        +'<button class="check-btn'+(isDone?' done-state':'')+'" id="cb_'+j+'" onclick="toggleDone('+j+',\''+enc+'\')">'+(isDone?T.completed:T.done)+'</button>'
-        +'<button class="hist-btn" onclick="openHistModal(\''+enc+'\')" title="History">&#128200;</button>'
-        +'<a class="yt-btn" href="'+ytUrl+'" target="_blank" title="YouTube">'+YT_SVG+'</a>'
-      +'</div>'
     +'</div>';
   }
   html+='</div>';
@@ -570,12 +767,28 @@ document.addEventListener('click',function(e){
     if(m)m.classList.remove('open');
   }
 });
-function deletePlan(){
-  if(!confirm(curLang==='he'?'למחוק את התוכנית הנוכחית?':'Delete current plan?'))return;
+function deletePlan(e){
+  if(e)e.stopPropagation();
+  var dpb=document.getElementById('deletePlanBtn');
+  // Two-tap confirmation: first tap shows "בטוח?" / "Sure?", second tap deletes
+  if(dpb.dataset.confirm!=='1'){
+    dpb.dataset.confirm='1';
+    dpb.textContent=curLang==='he'?'⚠️ בטוח?':'⚠️ Sure?';
+    dpb.style.background='rgba(248,113,113,0.3)';
+    setTimeout(function(){
+      dpb.dataset.confirm='';
+      dpb.textContent=T.deleteBtn;
+      dpb.style.background='';
+    },2500);
+    return;
+  }
+  dpb.dataset.confirm='';
   plan=[];curDay=0;done={};saveDone();
   try{localStorage.removeItem(STORAGE_KEY);}catch(e){}
+  document.getElementById('dropdownMenu').classList.remove('open');
   updateUI();renderTabs();renderDay();
 }
+
 /* INIT */
 try{localStorage.removeItem('gym_plan');localStorage.removeItem('gym_plan_ver');}catch(e){}
 var stored='';try{stored=localStorage.getItem(STORAGE_KEY)||'';}catch(e){}
