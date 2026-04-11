@@ -633,7 +633,7 @@ var DAY_MAP_EN=[
 
 /* safe short form — remove dash separators, truncate, strip special chars */
 function toShort(name, maxLen){
-  var s=name.replace(/\s*[—–]\s*/g,' ').replace(/[()[\]{}|]/g,'').replace(/\s{2,}/g,' ').trim();
+  var s=name.replace(/\s*[—–:]\s*/g,' ').replace(/[()[\]{}|]/g,'').replace(/\s{2,}/g,' ').trim();
   return s.length>maxLen?s.slice(0,maxLen-1)+'…':s;
 }
 
@@ -664,7 +664,7 @@ function getTabMeta(fullName, exercises){
   var seqLat=/\b[A-Z]\b/.test(n);             // single uppercase Latin letter
   var seqNum=/\b\d+\b/.test(n);               // standalone number
   if(seqHe||seqLat||seqNum){
-    var part=n.split(/\s*[—–]\s*/)[0].trim();
+    var part=n.split(/\s*[—–:]\s*/)[0].trim();
     return {label:toShort(part,11), isDay:false};
   }
 
