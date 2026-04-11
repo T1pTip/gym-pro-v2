@@ -159,7 +159,7 @@ body.ltr .week-bar-label{margin-right:auto;margin-left:0}
 .menu-btn:active{background:var(--accent);color:#fff}
 .menu-dots{display:flex;flex-direction:column;gap:3px;pointer-events:none}
 .menu-dots span{width:4px;height:4px;border-radius:50%;background:currentColor;display:block}
-.dropdown-menu{display:none;position:absolute;top:44px;left:0;background:#111422;border:1px solid var(--border);border-radius:12px;padding:8px;min-width:160px;z-index:200;flex-direction:column;gap:6px}
+.dropdown-menu{display:none;position:absolute;top:44px;right:0;background:#111422;border:1px solid var(--border);border-radius:12px;padding:8px;min-width:160px;z-index:200;flex-direction:column;gap:6px}
 .dropdown-menu.open{display:flex}
 .lang-toggle-row{display:flex;gap:0;border-radius:20px;overflow:hidden;border:1px solid var(--border);background:var(--card2)}
 .lang-toggle-row button{padding:6px 14px;border:none;background:transparent;color:var(--muted);font-size:12px;font-weight:700;font-family:'Heebo',Arial,sans-serif;cursor:pointer;transition:.15s}
@@ -170,7 +170,9 @@ body.ltr .week-bar-label{margin-right:auto;margin-left:0}
 <div id="app">
   <div class="header">
     <div class="hrow" style="justify-content:space-between">
-      <div class="menu-btn" id="menuBtn" onclick="toggleMenu()">
+      <button class="edit-btn" id="editBtn" style="min-width:36px;padding:7px 10px;display:flex;align-items:center;justify-content:center"><svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a.996.996 0 0 0 0-1.41l-2.34-2.34a.996.996 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg></button>
+      <div class="logo">GYM PRO</div>
+      <div class="menu-btn" id="menuBtn" onclick="toggleMenu()" style="position:relative">
         <div class="menu-dots"><span></span><span></span><span></span></div>
         <div class="dropdown-menu" id="dropdownMenu">
           <div class="lang-toggle-row">
@@ -180,8 +182,6 @@ body.ltr .week-bar-label{margin-right:auto;margin-left:0}
           <button class="edit-btn del-plan-btn" id="deletePlanBtn" style="display:none;width:100%" onclick="event.stopPropagation();deletePlan()"></button>
         </div>
       </div>
-      <div class="logo">GYM PRO</div>
-      <button class="edit-btn" id="editBtn" style="min-width:36px;padding:7px 10px">✏️</button>
     </div>
     <div class="tabs" id="tabs"></div>
   </div>
@@ -230,7 +230,7 @@ body.ltr .week-bar-label{margin-right:auto;margin-left:0}
 <script>
 var LANG={
   he:{
-    editBtn:'✏️ ערוך תוכנית',openPlan:'📂 טען תוכנית',loadBtn:'📂 טען תוכנית',deleteBtn:'🗑️ מחק',
+    editBtn:'ערוך תוכנית',openPlan:'📂 טען תוכנית',loadBtn:'📂 טען תוכנית',deleteBtn:'🗑️ מחק',
     sets:'סטים',reps:'חזרות',done:'סיימתי',completed:'✓ הושלם',exs:'תרגילים',
     emptyHint:'אין תוכנית אימון טעונה',emptyCta:'📂 טען תוכנית',noEx:'לא נמצאו תרגילים. נסה שוב.',
     week13:'שבועות 1–3',week4:'שבוע 4/8',weekPower:'🔥 שבוע כוח',weekNormal:'שבוע רגיל',
@@ -243,7 +243,7 @@ var LANG={
     placeholder:'אימון A — חזה + רגליים\nאימון משלב כוח\n* בנץ פרס: 4 סטים, 8-10 חזרות\n* סקוואט: 4 סטים, 6 חזרות\n\nאימון B — זרועות\nסופר-סט לזרועות\nסופר-סט\n* כפיפת מרפקים: 3 סטים, 10-12 חזרות\n* פשיטת מרפקים: 3 סטים, 10-12 חזרות'
   },
   en:{
-    editBtn:'✏️ Edit Plan',openPlan:'📂 Load Plan',loadBtn:'📂 Load Plan',deleteBtn:'🗑️ Clear',
+    editBtn:'Edit Plan',openPlan:'📂 Load Plan',loadBtn:'📂 Load Plan',deleteBtn:'🗑️ Clear',
     sets:'Sets',reps:'Reps',done:'Done',completed:'✓ Done',exs:'exercises',
     emptyHint:'No workout plan loaded',emptyCta:'📂 Load a Plan',noEx:'No exercises found. Please try again.',
     week13:'Weeks 1–3',week4:'Week 4/8',weekPower:'🔥 Power Week',weekNormal:'Regular Week',
@@ -460,7 +460,7 @@ function beep(){try{var ac=new(window.AudioContext||window.webkitAudioContext)()
 function updateUI(){
   var hasPlan=plan.length>0;
   var eb=document.getElementById('editBtn'),pa=document.getElementById('panelActions');
-  eb.textContent=hasPlan?T.editBtn:T.openPlan;
+  /* SVG pencil - no text override */
   var dpb=document.getElementById('deletePlanBtn');if(dpb){dpb.textContent=T.deleteBtn;dpb.style.display=hasPlan?'':'none';}
   eb.className='edit-btn'+(hasPlan?'':' no-plan');
   if(hasPlan){pa.innerHTML='<button class="load-btn" onclick="doLoad()">'+T.loadBtn+'</button><button class="delete-btn" onclick="document.getElementById(\'planTxt\').value=\'\';document.getElementById(\'planTxt\').focus()">'+T.deleteBtn+'</button>';}
