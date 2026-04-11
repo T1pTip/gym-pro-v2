@@ -30,12 +30,12 @@ body.ltr{direction:ltr}
 .hrow{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:8px}
 .logo{font-family:'Bebas Neue',Impact,sans-serif;font-size:clamp(22px,6vw,28px);color:var(--accent);letter-spacing:3px;line-height:1;flex-shrink:0}
 .hrow-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
-.lang-toggle{background:var(--card2);border:1px solid var(--border);border-radius:20px;display:flex;overflow:hidden;flex-shrink:0;height:36px}
-.lang-toggle button{padding:0 12px;border:none;background:transparent;color:var(--muted);font-size:12px;font-weight:700;font-family:'Heebo',Arial,sans-serif;cursor:pointer;transition:.15s;line-height:36px}
+.lang-toggle{background:var(--card2);border:1px solid var(--border);border-radius:20px;display:flex;overflow:hidden;flex-shrink:0;height:40px}
+.lang-toggle button{padding:0 12px;border:none;background:transparent;color:var(--muted);font-size:12px;font-weight:700;font-family:'Heebo',Arial,sans-serif;cursor:pointer;transition:.15s;line-height:40px}
 .lang-toggle button.active{background:var(--accent);color:#fff}
 .lang-toggle button:first-child{border-radius:20px 0 0 20px}
 .lang-toggle button:last-child{border-radius:0 20px 20px 0}
-.edit-btn{background:var(--card2);border:1px solid var(--border);color:var(--accent);padding:7px 16px;border-radius:20px;cursor:pointer;font-size:13px;font-family:'Heebo',Arial,sans-serif;font-weight:500;min-height:36px;white-space:nowrap;transition:.15s}
+.edit-btn{background:var(--card2);border:1px solid var(--border);color:var(--accent);padding:7px 16px;border-radius:20px;cursor:pointer;font-size:13px;font-family:'Heebo',Arial,sans-serif;font-weight:500;min-height:40px;min-width:40px;white-space:nowrap;transition:.15s}
 .edit-btn:active{background:var(--accent);color:#fff}
 .edit-btn.no-plan{background:var(--accent);color:#fff;border-color:var(--accent);font-weight:700}
 .tabs{display:flex;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;border-bottom:1px solid var(--border)}
@@ -79,7 +79,8 @@ body.ltr .edit-panel textarea{direction:ltr}
 .ex-num{font-family:'Bebas Neue',Impact,sans-serif;font-size:22px;color:rgba(129,140,248,0.2);min-width:26px;text-align:center;flex-shrink:0;line-height:1.1;padding-top:2px}
 .ex-info{flex:1;min-width:0}
 .ex-name{font-size:15px;font-weight:700;color:var(--text);margin-bottom:8px;line-height:1.3;word-break:break-word;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
-.ex-meta{display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding-bottom:14px}
+.ex-meta{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding-bottom:10px}
+.ex-actions{display:flex;gap:6px;flex-shrink:0;margin-top:2px}
 .badge{background:var(--accent-dim);border:1px solid var(--accent-border);border-radius:20px;padding:3px 11px;font-size:12px;color:#94a3b8;white-space:nowrap;line-height:1.4}
 .badge b{color:var(--accent)}
 .cat-badge{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:20px;padding:3px 11px;font-size:12px;color:#475569;line-height:1.4}
@@ -154,7 +155,7 @@ body.ltr .week-bar-label{margin-right:auto;margin-left:0}
 .del-plan-btn{color:var(--red);border-color:rgba(248,113,113,0.3);background:var(--red-dim)}
 .del-plan-btn:active{background:var(--red);color:#fff}
 
-.menu-btn{background:var(--card2);border:1px solid var(--border);color:var(--accent);width:36px;height:36px;border-radius:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:.15s;position:relative}
+.menu-btn{background:var(--card2);border:1px solid var(--border);color:var(--accent);width:40px;height:40px;border-radius:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:.15s;position:relative}
 .menu-btn:active{background:var(--accent);color:#fff}
 .menu-dots{display:flex;flex-direction:column;gap:3px;pointer-events:none}
 .menu-dots span{width:4px;height:4px;border-radius:50%;background:currentColor;display:block}
@@ -461,6 +462,9 @@ function createExerciseCard(line,isSuperset){
    END OF UPGRADED PARSER
    ===================================================================== */
 
+/* HTML sanitization — prevent XSS in exercise names */
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+
 var AB_KW=['בטן','פלאנק','crunch','plank','ab ','abs','leg raise','sit up'];
 function isAb(n){return AB_KW.some(function(k){return n.toLowerCase().indexOf(k)>=0;});}
 function buildOpts(s){var o='<option value="">'+T.weightOpt+'</option>';for(var w=5;w<=200;w+=5)o+='<option value="'+w+'"'+(s==w?' selected':'')+'>'+w+' kg</option>';return o;}
@@ -497,7 +501,7 @@ function recordWeight(exName,kg){
 function openHistModal(encodedName){
   var exName=decodeURIComponent(encodedName);
   var h=loadHist(),k=exKey(exName),data=h[k]||[];
-  document.getElementById('histTitle').textContent=exName;
+  document.getElementById('histTitle').textContent=exName; // safe: textContent
   document.getElementById('histSub').textContent=T.histTitle;
   var statsEl=document.getElementById('histStats');
   var emptyEl=document.getElementById('histEmpty');
@@ -700,8 +704,8 @@ function renderDay(){
   var pct=total?Math.round(dc/total*100):0;
   var hasWeekVar=exercises.some(function(e){return e.weekVariants;});
   var weekMode=weekModes[curDay]||'w1';
-  var html='<div class="progress-wrap"><div class="prog-label"><span style="font-weight:700;color:var(--text)">'+day.fullName+'</span><span>'+dc+'/'+total+' '+T.exs+'</span></div><div class="prog-bar"><div class="prog-fill" style="width:'+pct+'%"></div></div></div>';
-  if(day.tabDescription)html+='<div class="day-desc">'+day.tabDescription+'</div>';
+  var html='<div class="progress-wrap"><div class="prog-label"><span style="font-weight:700;color:var(--text)">'+esc(day.fullName)+'</span><span>'+dc+'/'+total+' '+T.exs+'</span></div><div class="prog-bar"><div class="prog-fill" style="width:'+pct+'%"></div></div></div>';
+  if(day.tabDescription)html+='<div class="day-desc">'+esc(day.tabDescription)+'</div>';
   if(hasWeekVar){html+='<div class="week-bar"><div class="week-seg"><button onclick="setWeekMode(\'w1\')" class="'+(weekMode==='w1'?'active':'')+'">'+T.week13+'</button><button onclick="setWeekMode(\'w4\')" class="'+(weekMode==='w4'?'active':'')+'">'+T.week4+'</button></div><span class="week-bar-label">'+(weekMode==='w4'?T.weekPower:T.weekNormal)+'</span></div>';}
   html+='<div class="ex-list">';
   for(var j=0;j<exercises.length;j++){
@@ -721,14 +725,16 @@ function renderDay(){
     html+='<div class="'+rowClass+'" id="row_'+j+'">'
       +'<div class="ex-top"><div class="ex-num">'+(j+1)+'</div>'
       +'<div class="ex-info">'
-        +'<div class="ex-name">'+ex.name+(catLabel?' <span class="cat-badge">'+catLabel+'</span>':'')+' '+ssTag+'</div>'
+        +'<div class="ex-name">'+esc(ex.name)+(catLabel?' <span class="cat-badge">'+catLabel+'</span>':'')+' '+ssTag+'</div>'
         +'<div class="ex-meta">'
           +'<div class="badge">'+T.setsLabel+'<b>'+dispSets+'</b></div>'
           +'<div class="badge">'+T.repsLabel+'<b>'+dispReps+'</b></div>'
           +wB
-          +'<button class="hist-btn" onclick="openHistModal(\''+enc+'\')" title="History">&#128200;</button>'
-          +'<a class="yt-btn" href="'+ytUrl+'" target="_blank" title="YouTube">'+YT_SVG+'</a>'
-          +'<button class="check-btn'+(isDone?' done-state':'')+'" id="cb_'+j+'" onclick="toggleDone('+j+',\''+enc+'\')">'+(isDone?T.completed:T.done)+'</button>'
+          +'<div class="ex-actions">'
+            +'<button class="hist-btn" onclick="openHistModal(\''+enc+'\')" title="History">&#128200;</button>'
+            +'<a class="yt-btn" href="'+ytUrl+'" target="_blank" title="YouTube">'+YT_SVG+'</a>'
+            +'<button class="check-btn'+(isDone?' done-state':'')+'" id="cb_'+j+'" onclick="toggleDone('+j+',\''+enc+'\')">'+(isDone?T.completed:T.done)+'</button>'
+          +'</div>'
         +'</div>'
         +pNote
       +'</div></div>'
