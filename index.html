@@ -152,6 +152,8 @@ body.ltr .week-bar-label{margin-right:auto;margin-left:0}
 .timer-skip{background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.2);color:var(--red);padding:7px 12px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:700;font-family:'Heebo',Arial,sans-serif}
 .timer-track{width:100%;max-width:400px;height:3px;background:rgba(129,140,248,0.08);border-radius:2px;overflow:hidden}
 .timer-track-fill{height:100%;background:var(--accent);border-radius:2px;transition:width .5s linear}
+.del-plan-btn{color:var(--red);border-color:rgba(248,113,113,0.3);background:var(--red-dim)}
+.del-plan-btn:active{background:var(--red);color:#fff}
 </style>
 </head>
 <body class="rtl">
@@ -165,6 +167,7 @@ body.ltr .week-bar-label{margin-right:auto;margin-left:0}
           <button id="btnEN" onclick="setLang('en')">EN</button>
         </div>
         <button class="edit-btn" id="editBtn"></button>
+        <button class="edit-btn del-plan-btn" id="deletePlanBtn" style="display:none" onclick="deletePlan()"></button>
       </div>
     </div>
     <div class="tabs" id="tabs"></div>
@@ -439,6 +442,7 @@ function updateUI(){
   var hasPlan=plan.length>0;
   var eb=document.getElementById('editBtn'),pa=document.getElementById('panelActions');
   eb.textContent=hasPlan?T.editBtn:T.openPlan;
+  var dpb=document.getElementById('deletePlanBtn');if(dpb){dpb.textContent=T.deleteBtn;dpb.style.display=hasPlan?'':'none';}
   eb.className='edit-btn'+(hasPlan?'':' no-plan');
   if(hasPlan){pa.innerHTML='<button class="load-btn" onclick="doLoad()">'+T.loadBtn+'</button><button class="delete-btn" onclick="document.getElementById(\'planTxt\').value=\'\';document.getElementById(\'planTxt\').focus()">'+T.deleteBtn+'</button>';}
   else{pa.innerHTML='<button class="load-btn" onclick="doLoad()">'+T.loadBtn+'</button>';}
@@ -526,6 +530,12 @@ function toggleDone(j,enc){
 function openEditPanel(){var p=document.getElementById('editPanel');p.style.display='block';document.getElementById('planTxt').value='';document.getElementById('planTxt').focus();}
 document.getElementById('editBtn').onclick=function(){var p=document.getElementById('editPanel');if(p.style.display==='block'){p.style.display='none';return;}openEditPanel();};
 
+function deletePlan(){
+  if(!confirm(curLang==='he'?'למחוק את התוכנית הנוכחית?':'Delete current plan?'))return;
+  plan=[];curDay=0;done={};saveDone();
+  try{localStorage.removeItem(STORAGE_KEY);}catch(e){}
+  updateUI();renderTabs();renderDay();
+}
 /* INIT */
 try{localStorage.removeItem('gym_plan');localStorage.removeItem('gym_plan_ver');}catch(e){}
 var stored='';try{stored=localStorage.getItem(STORAGE_KEY)||'';}catch(e){}
