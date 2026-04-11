@@ -61,7 +61,7 @@ body.ltr .edit-panel textarea{direction:ltr}
 
 /* Progress */
 .progress-wrap{padding:12px 16px 8px}
-.prog-label{font-size:16px;color:var(--muted);margin-bottom:6px;display:flex;justify-content:space-between}
+.prog-label{font-size:13px;color:var(--muted);margin-bottom:6px;display:flex;justify-content:space-between;align-items:center}
 .prog-bar{height:3px;background:#1e2030;border-radius:2px;overflow:hidden}
 .prog-fill{height:100%;background:var(--accent);transition:width .4s;border-radius:2px}
 
@@ -79,7 +79,9 @@ body.ltr .edit-panel textarea{direction:ltr}
 .ex-num{font-family:'Bebas Neue',Impact,sans-serif;font-size:22px;color:rgba(129,140,248,0.2);min-width:26px;text-align:center;flex-shrink:0;line-height:1.1;padding-top:2px}
 .ex-info{flex:1;min-width:0}
 .ex-name{font-size:15px;font-weight:700;color:var(--text);margin-bottom:8px;line-height:1.3;word-break:break-word;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
-.ex-meta{display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding-bottom:14px}
+.ex-meta{display:flex;flex-direction:column;gap:8px;padding-bottom:14px}
+.ex-meta-info{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.ex-meta-actions{display:flex;gap:6px;align-items:center}
 .badge{background:var(--accent-dim);border:1px solid var(--accent-border);border-radius:20px;padding:3px 11px;font-size:12px;color:#94a3b8;white-space:nowrap;line-height:1.4}
 .badge b{color:var(--accent)}
 .cat-badge{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:20px;padding:3px 11px;font-size:12px;color:#475569;line-height:1.4}
@@ -103,7 +105,7 @@ body.ltr .power-note{border-right:none;border-left:2px solid #fb923c}
 .yt-btn svg{width:22px;height:16px;display:block}
 
 /* Week bar */
-.day-desc{padding:0 16px 10px;font-size:16px;color:var(--muted);line-height:1.6;font-style:normal;border-bottom:1px solid var(--border);margin-bottom:4px}
+.day-desc{padding:0 16px 10px;font-size:13px;color:var(--muted);line-height:1.5;font-style:normal;border-bottom:1px solid var(--border);margin-bottom:4px}
 .week-bar{display:flex;align-items:center;gap:6px;padding:10px 16px 4px}
 .week-bar-label{font-size:11px;color:var(--muted);margin-left:auto}
 body.rtl .week-bar-label{margin-left:auto;margin-right:0}
@@ -723,12 +725,16 @@ function renderDay(){
       +'<div class="ex-info">'
         +'<div class="ex-name">'+ex.name+(catLabel?' <span class="cat-badge">'+catLabel+'</span>':'')+' '+ssTag+'</div>'
         +'<div class="ex-meta">'
-          +'<div class="badge">'+T.setsLabel+'<b>'+dispSets+'</b></div>'
-          +'<div class="badge">'+T.repsLabel+'<b>'+dispReps+'</b></div>'
-          +wB
-          +'<button class="hist-btn" onclick="openHistModal(\''+enc+'\')" title="History">&#128200;</button>'
-          +'<a class="yt-btn" href="'+ytUrl+'" target="_blank" title="YouTube">'+YT_SVG+'</a>'
-          +'<button class="check-btn'+(isDone?' done-state':'')+'" id="cb_'+j+'" onclick="toggleDone('+j+',\''+enc+'\')">'+(isDone?T.completed:T.done)+'</button>'
+          +'<div class="ex-meta-info">'
+            +'<div class="badge">'+T.setsLabel+'<b>'+dispSets+'</b></div>'
+            +'<div class="badge">'+T.repsLabel+'<b>'+dispReps+'</b></div>'
+            +wB
+          +'</div>'
+          +'<div class="ex-meta-actions">'
+            +'<button class="hist-btn" onclick="openHistModal(\''+enc+'\')" title="History">&#128200;</button>'
+            +'<a class="yt-btn" href="'+ytUrl+'" target="_blank" title="YouTube">'+YT_SVG+'</a>'
+            +'<button class="check-btn'+(isDone?' done-state':'')+'" id="cb_'+j+'" onclick="toggleDone('+j+',\''+enc+'\')">'+(isDone?T.completed:T.done)+'</button>'
+          +'</div>'
         +'</div>'
         +pNote
       +'</div></div>'
