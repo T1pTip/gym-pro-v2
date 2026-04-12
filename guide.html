@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GYM PRO v2 — Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0b0d14;
+  --card:#13151f;
+  --border:rgba(129,140,248,0.12);
+  --accent:#818cf8;
+  --accent2:#34d399;
+  --red:#f87171;
+  --yellow:#fbbf24;
+  --text:#e2e8f0;
+  --muted:#64748b;
+  --radius:16px;
+}
+
+html{scroll-behavior:smooth}
+body{
+  font-family:'DM Sans',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  line-height:1.6;
+}
+
+/* ── RTL/LTR ── */
+body.rtl{direction:rtl;text-align:right}
+body.ltr{direction:ltr;text-align:left}
+
+/* ── NAV ── */
+.nav{
+  position:sticky;top:0;z-index:100;
+  background:rgba(11,13,20,0.9);
+  backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--border);
+  padding:14px 24px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.nav-logo{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:24px;letter-spacing:3px;
+  color:var(--accent);
+}
+.nav-right{display:flex;align-items:center;gap:12px}
+.lang-seg{
+  display:flex;border-radius:20px;overflow:hidden;
+  border:1px solid var(--border);
+  background:var(--card);
+}
+.lang-seg button{
+  padding:6px 14px;border:none;background:transparent;
+  color:var(--muted);font-size:12px;font-weight:700;
+  font-family:'DM Sans',sans-serif;cursor:pointer;transition:.15s;
+}
+.lang-seg button.active{background:var(--accent);color:#fff}
+.app-link{
+  padding:7px 16px;border-radius:20px;
+  background:var(--accent);color:#fff;
+  font-size:13px;font-weight:700;
+  text-decoration:none;font-family:'DM Sans',sans-serif;
+  white-space:nowrap;
+}
+
+/* ── HERO ── */
+.hero{
+  padding:80px 24px 60px;
+  text-align:center;
+  max-width:640px;margin:0 auto;
+}
+.hero-badge{
+  display:inline-block;
+  padding:4px 14px;border-radius:20px;
+  background:rgba(129,140,248,0.1);
+  border:1px solid rgba(129,140,248,0.2);
+  color:var(--accent);font-size:12px;font-weight:700;
+  letter-spacing:1px;margin-bottom:24px;
+}
+.hero h1{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(48px,12vw,80px);
+  line-height:0.95;letter-spacing:2px;
+  color:#fff;margin-bottom:20px;
+}
+.hero h1 span{color:var(--accent)}
+.hero p{
+  font-size:17px;color:var(--muted);
+  line-height:1.7;max-width:480px;margin:0 auto;
+}
+
+/* ── STEPS ── */
+.steps{
+  max-width:680px;margin:0 auto;
+  padding:0 24px 80px;
+  display:flex;flex-direction:column;gap:2px;
+}
+.step{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:28px 32px;
+  position:relative;
+  transition:border-color .2s;
+}
+.step:hover{border-color:rgba(129,140,248,0.3)}
+.step-num{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:56px;line-height:1;
+  color:rgba(129,140,248,0.1);
+  position:absolute;
+  top:20px;
+}
+body.ltr .step-num{right:24px}
+body.rtl .step-num{left:24px}
+.step-icon{font-size:28px;margin-bottom:10px;display:block}
+.step h2{
+  font-size:20px;font-weight:700;
+  color:#fff;margin-bottom:8px;
+}
+.step p{font-size:15px;color:var(--muted);line-height:1.7}
+.step p b{color:var(--text)}
+.step p em{color:var(--muted);font-style:italic}
+
+/* Code block */
+.code-block{
+  margin-top:16px;
+  background:#07080f;
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:14px 16px;
+  font-family:'Courier New',monospace;
+  font-size:13px;
+  color:#94a3b8;
+  line-height:1.8;
+  white-space:pre-wrap;
+}
+.code-block .hl{color:var(--accent)}
+.code-block .hl2{color:var(--accent2)}
+
+/* Inline tag */
+.tag{
+  display:inline-block;
+  padding:2px 8px;border-radius:6px;
+  background:rgba(129,140,248,0.1);
+  color:var(--accent);font-size:13px;font-weight:700;
+  font-family:'Courier New',monospace;
+}
+.tag.green{background:rgba(52,211,153,0.1);color:var(--accent2)}
+.tag.red{background:rgba(248,113,113,0.08);color:var(--red)}
+.tag.yellow{background:rgba(251,191,36,0.1);color:var(--yellow)}
+
+/* Tip box */
+.tip{
+  margin-top:14px;
+  padding:10px 14px;
+  border-radius:8px;
+  background:rgba(52,211,153,0.05);
+  border-right:2px solid var(--accent2);
+  font-size:13px;color:#94a3b8;
+}
+body.ltr .tip{border-right:none;border-left:2px solid var(--accent2)}
+
+/* Divider connector */
+.connector{
+  height:24px;width:2px;
+  background:var(--border);
+  margin:0 auto;
+}
+
+/* ── FOOTER ── */
+.footer{
+  text-align:center;
+  padding:40px 24px;
+  border-top:1px solid var(--border);
+  color:var(--muted);font-size:13px;
+}
+.footer a{color:var(--accent);text-decoration:none}
+
+/* Mobile */
+@media(max-width:600px){
+  .step{padding:22px 20px}
+  .hero{padding:50px 20px 40px}
+  .steps{padding:0 16px 60px}
+  body.rtl .step-num,body.ltr .step-num{top:14px;right:16px;left:auto}
+  body.rtl .step-num{right:auto;left:16px}
+}
+</style>
+</head>
+<body class="ltr">
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-logo">GYM PRO</div>
+  <div class="nav-right">
+    <div class="lang-seg">
+      <button id="btnEN" class="active" onclick="setLang('en')">EN</button>
+      <button id="btnHE" onclick="setLang('he')">HE</button>
+    </div>
+    <a class="app-link" href="https://t1ptip.github.io/gym-pro-v2/" id="openApp">Open App →</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-badge" id="badge">USER GUIDE</div>
+  <h1 id="heroTitle">THE GUIDE<br><span>NO ONE READS</span></h1>
+  <p id="heroSub">But you're here. Smart. Let's get you lifting instead of clicking through some overpriced fitness app.</p>
+</section>
+
+<!-- STEPS -->
+<div class="steps">
+
+  <!-- 1 -->
+  <div class="step">
+    <div class="step-num">1</div>
+    <span class="step-icon">✏️</span>
+    <h2 id="s1title">Paste your plan. That's it.</h2>
+    <p id="s1body">Hit the <b>✏️ pencil</b> button at the top. A text box appears. Paste your workout in plain text — any format, any language. The app figures it out. Like a personal trainer, but without the small talk.</p>
+    <div class="code-block" id="s1code"></div>
+    <div class="tip" id="s1tip">💡 Double blank line = new tab. Each block becomes a separate workout day.</div>
+  </div>
+
+  <div class="connector"></div>
+
+  <!-- 2 -->
+  <div class="step">
+    <div class="step-num">2</div>
+    <span class="step-icon">🗂️</span>
+    <h2 id="s2title">Tabs are magic.</h2>
+    <p id="s2body">Each workout block becomes a <b>tab at the top</b>. Day names like <span class="tag">יום שני</span> or <span class="tag">Monday</span> show as short names. Sequential workouts like <span class="tag">Workout A</span> show as a short label. No plan fits on a single day anyway — unless you're a masochist.</p>
+    <div class="tip" id="s2tip">💡 A tiny <b>2/8</b> counter appears on each tab. Watch it fill up. It's the best part.</div>
+  </div>
+
+  <div class="connector"></div>
+
+  <!-- 3 -->
+  <div class="step">
+    <div class="step-num">3</div>
+    <span class="step-icon">✅</span>
+    <h2 id="s3title">Done a set? Hit "Done".</h2>
+    <p id="s3body">Each exercise card has a <span class="tag green">סיימתי</span> button. Tap it when you're done. A <b>90-second rest timer</b> starts automatically — with a ring, a countdown, and a beep at the end. You can add <b>+30s</b> or skip it entirely if you're either a hero or in a hurry.</p>
+    <div class="tip" id="s3tip">⏱️ The beep is real. Don't be startled in a quiet gym.</div>
+  </div>
+
+  <div class="connector"></div>
+
+  <!-- 4 -->
+  <div class="step">
+    <div class="step-num">4</div>
+    <span class="step-icon">⚖️</span>
+    <h2 id="s4title">Track your weight.</h2>
+    <p id="s4body">Each card has a <span class="tag">משקל ▼</span> dropdown. Pick your weight in kg. It's saved automatically. Hit <span class="tag">📈</span> to see your weight history — a bar chart with your last 10 sessions. Watch those bars grow. <em>That's the whole point.</em></p>
+  </div>
+
+  <div class="connector"></div>
+
+  <!-- 5 -->
+  <div class="step">
+    <div class="step-num">5</div>
+    <span class="step-icon">🔗</span>
+    <h2 id="s5title">Supersets — for the overachievers.</h2>
+    <p id="s5body">Add a line that says <span class="tag yellow">סופר-סט</span> or <span class="tag yellow">superset</span> before a group of exercises. They'll get a gold border and a badge. The app respects your ambition. Your muscles won't.</p>
+    <div class="code-block" id="s5code"></div>
+  </div>
+
+  <div class="connector"></div>
+
+  <!-- 6 -->
+  <div class="step">
+    <div class="step-num">6</div>
+    <span class="step-icon">🔥</span>
+    <h2 id="s6title">Power week — when you're feeling heroic.</h2>
+    <p id="s6body">Use <span class="tag yellow">שבועות 1-3</span> and <span class="tag yellow">שבוע 4</span> formats in your plan. A toggle appears — switch between <b>weeks 1–3</b> and <b>Power Week</b>. More sets, heavier reps, questionable life decisions. Your call.</p>
+  </div>
+
+  <div class="connector"></div>
+
+  <!-- 7 -->
+  <div class="step">
+    <div class="step-num">7</div>
+    <span class="step-icon">▶️</span>
+    <h2 id="s7title">YouTube, one tap away.</h2>
+    <p id="s7body">Every exercise card has a <span class="tag red">▶</span> button. Tap it and YouTube opens with a search for that exercise. No excuses for bad form. Well — fewer excuses.</p>
+  </div>
+
+  <div class="connector"></div>
+
+  <!-- 8 -->
+  <div class="step">
+    <div class="step-num">8</div>
+    <span class="step-icon">📲</span>
+    <h2 id="s8title">Install it. It's free. Obviously.</h2>
+    <p id="s8body">Open the app in <b>Chrome on Android</b>. A banner appears at the bottom: "Add to Home Screen". Tap <b>Install</b>. Done — it lives on your phone like a real app. No App Store. No $0.99. No subscriptions. Just a file that works.</p>
+    <div class="tip" id="s8tip">🍎 On iPhone: Safari → Share → Add to Home Screen.</div>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <p id="footerText">GYM PRO v2 · <a href="https://t1ptip.github.io/gym-pro-v2/">Open App</a> · No ads. No sign-up. No nonsense.</p>
+</footer>
+
+<script>
+var COPY = {
+  en: {
+    badge: 'USER GUIDE',
+    heroTitle: 'THE GUIDE<br><span>NO ONE READS</span>',
+    heroSub: "But you're here. Smart. Let's get you lifting instead of clicking through some overpriced fitness app.",
+    openApp: 'Open App →',
+    s1title: 'Paste your plan. That\'s it.',
+    s1body: 'Hit the <b>✏️ pencil</b> button at the top. A text box appears. Paste your workout in plain text — any format, any language. The app figures it out. Like a personal trainer, but without the small talk.',
+    s1tip: '💡 Double blank line = new tab. Each block becomes a separate workout day.',
+    s2title: 'Tabs are magic.',
+    s2body: 'Each workout block becomes a <b>tab at the top</b>. Day names like <span class="tag">יום שני</span> or <span class="tag">Monday</span> show as short names. Sequential workouts like <span class="tag">Workout A</span> show as a short label. No plan fits on a single day anyway — unless you\'re a masochist.',
+    s2tip: '💡 A tiny <b>2/8</b> counter appears on each tab. Watch it fill up. It\'s the best part.',
+    s3title: 'Done a set? Hit "Done".',
+    s3body: 'Each exercise card has a <span class="tag green">Done</span> button. Tap it when you\'re done. A <b>90-second rest timer</b> starts automatically — with a ring, a countdown, and a beep at the end. You can add <b>+30s</b> or skip it entirely if you\'re either a hero or in a hurry.',
+    s3tip: '⏱️ The beep is real. Don\'t be startled in a quiet gym.',
+    s4title: 'Track your weight.',
+    s4body: 'Each card has a <span class="tag">Weight ▼</span> dropdown. Pick your weight in kg. It\'s saved automatically. Hit <span class="tag">📈</span> to see your history — a bar chart with your last 10 sessions. Watch those bars grow. <em>That\'s the whole point.</em>',
+    s5title: 'Supersets — for the overachievers.',
+    s5body: 'Add a line that says <span class="tag yellow">superset</span> before a group of exercises. They\'ll get a gold border and a badge. The app respects your ambition. Your muscles won\'t.',
+    s6title: 'Power week — when you\'re feeling heroic.',
+    s6body: 'Use week format in your plan. A toggle appears — switch between <b>weeks 1–3</b> and <b>Power Week</b>. More sets, heavier reps, questionable life decisions. Your call.',
+    s7title: 'YouTube, one tap away.',
+    s7body: 'Every exercise card has a <span class="tag red">▶</span> button. Tap it and YouTube opens with a search for that exercise. No excuses for bad form. Well — fewer excuses.',
+    s8title: 'Install it. It\'s free. Obviously.',
+    s8body: 'Open the app in <b>Chrome on Android</b>. A banner appears at the bottom: "Add to Home Screen". Tap <b>Install</b>. Done — it lives on your phone like a real app. No App Store. No $0.99. No subscriptions. Just a file that works.',
+    s8tip: '🍎 On iPhone: Safari → Share → Add to Home Screen.',
+    footer: 'GYM PRO v2 · <a href="https://t1ptip.github.io/gym-pro-v2/">Open App</a> · No ads. No sign-up. No nonsense.',
+    s1code: '<span class="hl">Workout A — Chest + Back</span>\nOptional description\n<span class="hl2">* Bench Press: 4 sets, 8-10 reps</span>\n* Row: 4 sets, 10 reps\n\n<span class="hl">Workout B — Arms</span>\nOptional description\n<span class="hl2">* Bench 4x10</span>\n* OHP — 3x8',
+    s5code: 'superset\n* Bicep Curl: 3 sets, 12 reps\n* Tricep Extension: 3 sets, 12 reps'
+  },
+  he: {
+    badge: 'מדריך משתמש',
+    heroTitle: 'המדריך<br><span>שאף אחד לא קורא</span>',
+    heroSub: 'אבל אתה כאן. חכם. בוא נעלה אותך על משקולות במקום לגלול אינסוף אפליקציות כושר יקרות.',
+    openApp: 'לאפליקציה ←',
+    s1title: 'הדבק תוכנית. זהו.',
+    s1body: 'לחץ על כפתור ה<b>✏️ עיפרון</b> למעלה. מופיע תיבת טקסט — הדבק את האימון בטקסט חופשי, בכל פורמט, בכל שפה. האפליקציה מבינה לבד. כמו מאמן אישי, רק בלי שיחות חולין.',
+    s1tip: '💡 שורה ריקה כפולה = טאב חדש. כל בלוק הופך ליום אימון נפרד.',
+    s2title: 'הטאבים עושים קסמים.',
+    s2body: 'כל בלוק אימון הופך ל<b>טאב למעלה</b>. שמות ימים כמו <span class="tag">יום שני</span> או <span class="tag">Monday</span> מוצגים בצורה קצרה. אימונים סדרתיים כמו <span class="tag">אימון A</span> מוצגים עם לייבל קצר. אף תוכנית לא מתאימה ליום אחד בכל מקרה — אלא אם כן אתה מסוכיסט.',
+    s2tip: '💡 מונה קטן <b>2/8</b> מופיע על כל טאב. תראה אותו מתמלא. זה הקטע הכי טוב.',
+    s3title: 'סיימת סט? לחץ "סיימתי".',
+    s3body: 'כל כרטיס תרגיל מכיל כפתור <span class="tag green">סיימתי</span>. לחץ עליו. <b>טיימר מנוחה של 90 שניות</b> מתחיל אוטומטית — עם טבעת, ספירה לאחור, וצפצוף בסוף. אפשר להוסיף <b>+30 שניות</b> או לדלג אם אתה גיבור או ממהר.',
+    s3tip: '⏱️ הצפצוף אמיתי. אל תיבהל בחדר כושר שקט.',
+    s4title: 'תעקוב אחרי המשקל.',
+    s4body: 'לכל כרטיס יש <span class="tag">משקל ▼</span> dropdown. בחר משקל בק"ג. נשמר אוטומטית. לחץ <span class="tag">📈</span> לראות היסטוריה — גרף עמודות עם 10 האימונים האחרונים. תראה את העמודות עולות. <em>זה כל העניין.</em>',
+    s5title: 'סופר-סט — לשאפתנים.',
+    s5body: 'הוסף שורה שאומרת <span class="tag yellow">סופר-סט</span> לפני קבוצת תרגילים. הם יקבלו גבול זהב ובאדג׳. האפליקציה מכבדת את השאפתנות שלך. השרירים פחות.',
+    s6title: 'שבוע כוח — כשאתה מרגיש גיבור.',
+    s6body: 'השתמש בפורמט שבועות בתוכנית. מופיע כפתור מתג — בחר בין <b>שבועות 1–3</b> ל<b>שבוע כוח</b>. יותר סטים, יותר כבד, החלטות מפוקפקות. הבחירה שלך.',
+    s7title: 'YouTube בלחיצה אחת.',
+    s7body: 'לכל כרטיס יש כפתור <span class="tag red">▶</span>. לחץ עליו ו-YouTube נפתח עם חיפוש לאותו תרגיל. אין תירוצים לטכניקה גרועה. טוב, פחות תירוצים.',
+    s8title: 'התקן. זה בחינם. כמובן.',
+    s8body: 'פתח את האפליקציה ב<b>Chrome באנדרואיד</b>. מופיע באנר בתחתית: "הוסף למסך הבית". לחץ <b>התקן</b>. זהו — היא גרה בפלאפון כמו אפליקציה אמיתית. ללא App Store. ללא 3.99₪. ללא מנויים. רק קובץ שעובד.',
+    s8tip: '🍎 באייפון: Safari → שיתוף → הוסף למסך הבית.',
+    footer: 'GYM PRO v2 · <a href="https://t1ptip.github.io/gym-pro-v2/">פתח אפליקציה</a> · ללא פרסומות. ללא הרשמה. ללא שטויות.',
+    s1code: '<span class="hl">אימון A — חזה + גב</span>\nתיאור אופציונלי\n<span class="hl2">* בנץ פרס: 4 סטים, 8-10 חזרות</span>\n* חתירה: 4 סטים, 10 חזרות\n\n<span class="hl">אימון B — זרועות</span>\nתיאור אופציונלי\n<span class="hl2">* בנץ 4x10</span>\n* לחיצת כתפיים — 3x8',
+    s5code: 'סופר-סט\n* ביספס: 3 סטים, 12 חזרות\n* טריספס: 3 סטים, 12 חזרות'
+  }
+};
+
+var cur = 'en';
+function setLang(lang) {
+  cur = lang;
+  document.body.className = lang === 'he' ? 'rtl' : 'ltr';
+  document.documentElement.lang = lang;
+  document.getElementById('btnEN').className = lang === 'en' ? 'active' : '';
+  document.getElementById('btnHE').className = lang === 'he' ? 'active' : '';
+  var c = COPY[lang];
+  document.getElementById('badge').textContent = c.badge;
+  document.getElementById('heroTitle').innerHTML = c.heroTitle;
+  document.getElementById('heroSub').textContent = c.heroSub;
+  document.getElementById('openApp').textContent = c.openApp;
+  document.getElementById('s1title').textContent = c.s1title;
+  document.getElementById('s1body').innerHTML = c.s1body;
+  document.getElementById('s1tip').innerHTML = c.s1tip;
+  document.getElementById('s2title').textContent = c.s2title;
+  document.getElementById('s2body').innerHTML = c.s2body;
+  document.getElementById('s2tip').innerHTML = c.s2tip;
+  document.getElementById('s3title').textContent = c.s3title;
+  document.getElementById('s3body').innerHTML = c.s3body;
+  document.getElementById('s3tip').innerHTML = c.s3tip;
+  document.getElementById('s4title').textContent = c.s4title;
+  document.getElementById('s4body').innerHTML = c.s4body;
+  document.getElementById('s5title').textContent = c.s5title;
+  document.getElementById('s5body').innerHTML = c.s5body;
+  document.getElementById('s6title').textContent = c.s6title;
+  document.getElementById('s6body').innerHTML = c.s6body;
+  document.getElementById('s7title').textContent = c.s7title;
+  document.getElementById('s7body').innerHTML = c.s7body;
+  document.getElementById('s8title').textContent = c.s8title;
+  document.getElementById('s8body').innerHTML = c.s8body;
+  document.getElementById('s8tip').innerHTML = c.s8tip;
+  document.getElementById('footerText').innerHTML = c.footer;
+  document.getElementById('s1code').innerHTML = c.s1code;
+  document.getElementById('s5code').innerHTML = c.s5code;
+}
+setLang('en');
+</script>
+</body>
+</html>
