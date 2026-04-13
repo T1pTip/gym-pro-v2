@@ -331,7 +331,8 @@ function setLang(lang) {
   });
   document.getElementById('footerText').innerHTML = c.footer;
 }
-setLang('en');
+var urlLang = new URLSearchParams(window.location.search).get('lang');
+setLang(urlLang === 'he' ? 'he' : 'en');
 </script>
 </body>
 </html>
