@@ -457,6 +457,7 @@ function createExerciseCard(line,isSuperset){
   name=name
     .replace(/[;:,|]+$/,'')          // trailing punctuation
     .replace(/\s*\(.*?\)\s*$/,'')    // trailing parenthetical
+    .replace(/\s*\([^)]*$/,'')       // unclosed trailing parenthesis e.g. "name ("
     .replace(/\s*[—–\-]+\s*$/,'')    // trailing dash
     .replace(/\s{2,}/g,' ')
     .trim();
