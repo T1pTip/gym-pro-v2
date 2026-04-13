@@ -84,7 +84,7 @@ body.ltr .edit-panel textarea{direction:ltr}
 .badge{background:var(--accent-dim);border:1px solid var(--accent-border);border-radius:20px;padding:3px 11px;font-size:12px;color:#94a3b8;white-space:nowrap;line-height:1.4}
 .badge b{color:var(--accent)}
 .cat-badge{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:20px;padding:3px 11px;font-size:12px;color:#475569;line-height:1.4}
-.weight-select{background:var(--accent-dim);border:1px solid var(--accent-border);border-radius:20px;padding:3px 22px 3px 22px;font-size:12px;font-family:'Heebo',Arial,sans-serif;color:#94a3b8;cursor:pointer;outline:none;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0l4 5 4-5z' fill='%23818cf8'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:left 7px center;line-height:1.4}
+.weight-select{background:var(--accent-dim);border:1px solid var(--accent-border);border-radius:20px;padding:3px 22px 3px 22px;font-size:12px;font-family:'Heebo',Arial,sans-serif;color:#94a3b8;cursor:pointer;outline:none;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0l4 5 4-5z' fill='%23818cf8'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:left 7px center;line-height:1.4;min-height:38px}
 body.ltr .weight-select{padding:3px 22px 3px 8px;background-position:right 7px center}
 .weight-select.picked{color:var(--accent)}
 .weight-select option{background:#0d0f1a;color:var(--text)}
@@ -186,7 +186,7 @@ body.ltr .dropdown-menu{left:auto;right:0}
       <button class="edit-btn" id="editBtn" style="min-width:36px;padding:7px 10px;display:flex;align-items:center;justify-content:center"><svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a.996.996 0 0 0 0-1.41l-2.34-2.34a.996.996 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg></button>
       <div style="display:flex;align-items:center;gap:7px"><span class="streak-badge" id="streakBadge" style="display:none"></span><div class="logo">GYM PRO</div></div>
       <div style="display:flex;align-items:center;gap:6px">
-      <a class="guide-btn" id="guideBtn" href="https://t1ptip.github.io/gym-pro-v2/guide.html" target="_blank" title="מדריך">?</a>
+      <a class="guide-btn" id="guideBtn" href="#" onclick="event.preventDefault();window.open('https://t1ptip.github.io/gym-pro-v2/guide.html?lang='+(curLang||'he'),'_blank')" title="מדריך">?</a>
       <div class="menu-btn" id="menuBtn" onclick="toggleMenu()" style="position:relative">
         <div class="menu-dots"><span></span><span></span><span></span></div>
         <div class="dropdown-menu" id="dropdownMenu">
@@ -614,7 +614,7 @@ function updateUI(){
 }
 function doLoad(){
   var raw=document.getElementById('planTxt').value.trim();if(!raw)return;
-  var parsed=parseWorkout(cleanRawText(raw));if(!parsed.length){alert(T.noEx);return;}
+  var parsed=parseWorkout(cleanRawText(raw));if(!parsed.length){showNoExToast();return;}
   plan=parsed;curDay=0;done={};saveDone();
   try{localStorage.setItem(STORAGE_KEY,JSON.stringify(plan));}catch(e){}
   document.getElementById('editPanel').style.display='none';
@@ -809,6 +809,13 @@ function showCopiedToast(ok){
   t.textContent=T.shareCopied;
   document.body.appendChild(t);
   setTimeout(function(){t.remove();},2000);
+}
+function showNoExToast(){
+  var t=document.createElement('div');
+  t.style.cssText='position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#1e2235;border:1px solid rgba(248,113,113,0.3);color:#f87171;padding:10px 18px;border-radius:12px;z-index:400;font-size:14px;font-weight:700;white-space:nowrap;animation:toast-in .2s ease';
+  t.textContent=T.noEx||'לא נמצאו תרגילים 🤔';
+  document.body.appendChild(t);
+  setTimeout(function(){t.remove();},3000);
 }
 function openEditPanel(){var p=document.getElementById('editPanel');p.style.display='block';var ta=document.getElementById('planTxt');ta.value=planToText()||'';ta.focus();}
 document.getElementById('editBtn').onclick=function(){var p=document.getElementById('editPanel');if(p.style.display==='block'){p.style.display='none';return;}openEditPanel();};
