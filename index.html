@@ -194,6 +194,7 @@ body.ltr .dropdown-menu{left:auto;right:0}
             <button id="btnHE" class="active" onclick="event.stopPropagation();setLang('he')">HE</button>
             <button id="btnEN" onclick="event.stopPropagation();setLang('en')">EN</button>
           </div>
+          <button class="edit-btn" id="sharePlanBtn" style="display:none;width:100%" onclick="event.stopPropagation();sharePlan()"></button>
           <button class="edit-btn del-plan-btn" id="deletePlanBtn" style="display:none;width:100%" onclick="deletePlan(event)"></button>
         </div>
       </div>
@@ -257,7 +258,7 @@ var LANG={
     installTitle:'📲 הוסף למסך הבית',installSub:'גש ל-GYM PRO ישירות כמו אפליקציה',installBtn:'התקן',
     hintHTML:'<b>פורמטים נתמכים:</b><br>• <b>שם: X סטים, Y חזרות</b><br>• <b>שם — X×Y</b> או <b>שם X×Y</b><br>• <b>שם (X×Y)</b> או <b>שם | X סטים</b><br>• טקסט חופשי עם מספרים: <b>בנץ 4x10</b><br>• שורה עם כוכבית/מספר/מקף לפני השם<br>• <b>סופר-סט</b> בשורה נפרדת לפני תרגיל',
     placeholder:'אימון A — חזה + רגליים\nאימון משלב כוח\n* בנץ פרס: 4 סטים, 8-10 חזרות\n* סקוואט 4x6\n\nאימון B — זרועות\nסופר-סט לזרועות\nסופר-סט\n* כפיפת מרפקים: 3 סטים, 10-12 חזרות\n* פשיטת מרפקים: 3 סטים, 10-12 חזרות',
-    restDayLabel:'😴 יום מנוחה',planDeleted:'התוכנית נמחקה.',undoBtn:'↩ בטל',streakSuffix:' ימים 🔥'
+    restDayLabel:'😴 יום מנוחה',planDeleted:'התוכנית נמחקה.',undoBtn:'↩ בטל',streakSuffix:' ימים 🔥',shareBtn:'📤 שתף תוכנית',shareCopied:'✓ הועתק ללוח'
   },
   en:{
     editBtn:'Edit Plan',openPlan:'📂 Load Plan',loadBtn:'📂 Load Plan',deleteBtn:'🗑️ Clear',
@@ -271,7 +272,7 @@ var LANG={
     installTitle:'📲 Add to Home Screen',installSub:'Access GYM PRO like a native app',installBtn:'Install',
     hintHTML:'<b>Supported formats:</b><br>• <b>Name: X sets, Y reps</b><br>• <b>Name — X×Y</b> or <b>Name X×Y</b><br>• <b>Name (X×Y)</b> or <b>Name | X sets</b><br>• Free text with numbers: <b>Bench 4x10</b><br>• Lines starting with bullet/number/dash<br>• <b>superset</b> on its own line before an exercise',
     placeholder:'Workout A — Chest + Legs\nCombined strength session\n* Bench Press: 4 sets, 8-10 reps\n* Squat 4x6\n\nWorkout B — Arms\nSuperset for arms\nsuperset\n* Bicep Curl: 3 sets, 10-12 reps\n* Tricep Extension: 3 sets, 10-12 reps',
-    restDayLabel:'😴 Rest Day',planDeleted:'Plan deleted.',undoBtn:'↩ Undo',streakSuffix:' days 🔥'
+    restDayLabel:'😴 Rest Day',planDeleted:'Plan deleted.',undoBtn:'↩ Undo',streakSuffix:' days 🔥',shareBtn:'📤 Share Plan',shareCopied:'✓ Copied!'
   }
 };
 var curLang='he';try{curLang=localStorage.getItem('gym_lang')||'he';}catch(e){}
@@ -605,6 +606,7 @@ function updateUI(){
   var hasPlan=plan.length>0;
   var eb=document.getElementById('editBtn'),pa=document.getElementById('panelActions');
   var dpb=document.getElementById('deletePlanBtn');if(dpb){dpb.textContent=T.deleteBtn;dpb.style.display=hasPlan?'':'none';}
+  var spb=document.getElementById('sharePlanBtn');if(spb){spb.textContent=T.shareBtn;spb.style.display=hasPlan?'':'none';}
   eb.className='edit-btn'+(hasPlan?'':' no-plan');
   if(hasPlan){pa.innerHTML='<button class="load-btn" onclick="doLoad()">'+T.loadBtn+'</button><button class="delete-btn" onclick="document.getElementById(\'planTxt\').value=\'\';document.getElementById(\'planTxt\').focus()">'+T.deleteBtn+'</button>';}
   else{pa.innerHTML='<button class="load-btn" onclick="doLoad()">'+T.loadBtn+'</button>';}
@@ -788,6 +790,24 @@ function planToText(){
     });
     return lines.join('\n');
   }).join('\n\n\n');
+}
+function sharePlan(){
+  var text=planToText();if(!text)return;
+  var m=document.getElementById('dropdownMenu');if(m)m.classList.remove('open');
+  if(navigator.share){
+    navigator.share({title:'GYM PRO',text:text}).catch(function(){});
+  } else {
+    try{navigator.clipboard.writeText(text).then(function(){showCopiedToast();});}
+    catch(e){showCopiedToast(false);}
+  }
+}
+function showCopiedToast(ok){
+  if(ok===false)return;
+  var t=document.createElement('div');
+  t.style.cssText='position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#1e2235;border:1px solid rgba(52,211,153,0.3);color:#34d399;padding:10px 18px;border-radius:12px;z-index:400;font-size:14px;font-weight:700;white-space:nowrap;animation:toast-in .2s ease';
+  t.textContent=T.shareCopied;
+  document.body.appendChild(t);
+  setTimeout(function(){t.remove();},2000);
 }
 function openEditPanel(){var p=document.getElementById('editPanel');p.style.display='block';var ta=document.getElementById('planTxt');ta.value=planToText()||'';ta.focus();}
 document.getElementById('editBtn').onclick=function(){var p=document.getElementById('editPanel');if(p.style.display==='block'){p.style.display='none';return;}openEditPanel();};
