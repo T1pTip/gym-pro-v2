@@ -278,6 +278,7 @@ var LANG={
   }
 };
 var curLang='he';try{curLang=localStorage.getItem('gym_lang')||'he';}catch(e){}
+try{var _urlLang=new URLSearchParams(window.location.search).get('lang');if(_urlLang==='he'||_urlLang==='en'){curLang=_urlLang;}}catch(e){}
 var T=LANG[curLang];
 
 function setLang(lang){
