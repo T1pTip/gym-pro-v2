@@ -323,6 +323,7 @@ function setLang(lang) {
   document.getElementById('heroTitle').innerHTML = c.heroTitle;
   document.getElementById('heroSub').textContent = c.heroSub;
   document.getElementById('openApp').textContent = c.openApp;
+  document.getElementById('openApp').href = 'https://t1ptip.github.io/gym-pro-v2/?lang=' + lang;
   ['s1','s2','s3','s4','s5','s6','s7','s8','s9','s10','s11','s12'].forEach(function(s) {
     var el = document.getElementById(s+'title'); if(el) el.textContent = c[s+'title'];
     var eb = document.getElementById(s+'body');  if(eb) eb.innerHTML  = c[s+'body'];
