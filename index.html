@@ -89,6 +89,7 @@ body.ltr .edit-panel textarea{direction:ltr}
 .pr-badge{position:absolute;top:8px;right:-4px;background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#0d0f1a;font-size:11px;font-weight:800;padding:2px 6px;border-radius:8px;letter-spacing:.5px;box-shadow:0 2px 8px rgba(251,191,36,0.4);z-index:5;animation:pr-pop .4s ease}@keyframes pr-pop{0%{transform:scale(0)}60%{transform:scale(1.2)}100%{transform:scale(1)}}.ex-row.pr-card{border-color:rgba(251,191,36,0.4);position:relative}body.ltr .pr-badge{right:auto;left:-4px}
 .work-dur{display:none;position:absolute;top:10px;left:50%;transform:translateX(-50%);background:rgba(52,211,153,0.1);border:1px solid rgba(52,211,153,0.3);color:#34d399;font-size:11px;font-weight:700;padding:3px 10px;border-radius:14px;letter-spacing:.3px;pointer-events:none;z-index:50}.work-dur.active{display:block}
 .summary-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:1000;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(8px)}.summary-overlay.open{display:flex;animation:fade-in .25s ease}@keyframes fade-in{from{opacity:0}to{opacity:1}}.summary-card{background:#13151f;border:1px solid var(--accent-border);border-radius:20px;padding:30px 24px;max-width:340px;width:100%;text-align:center;position:relative;animation:pop-in .3s ease}@keyframes pop-in{0%{transform:scale(0.8);opacity:0}100%{transform:scale(1);opacity:1}}.summary-card h2{font-size:28px;color:var(--accent);margin-bottom:8px}.summary-stats{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:20px 0}.summary-stat{background:#1e2235;border-radius:12px;padding:12px}.summary-stat-val{font-size:24px;font-weight:800;color:#fff}.summary-stat-lbl{font-size:11px;color:var(--muted);margin-top:2px}.summary-close{background:var(--accent);color:#fff;border:none;padding:12px 28px;border-radius:16px;font-size:15px;font-weight:700;cursor:pointer;margin-top:8px;font-family:inherit}
+.notes-banner{background:linear-gradient(135deg,rgba(251,191,36,0.1),rgba(245,158,11,0.05));border:1px solid rgba(251,191,36,0.3);border-radius:12px;padding:14px;margin-top:16px}.notes-banner-title{display:flex;align-items:center;gap:6px;color:#fbbf24;font-weight:800;font-size:13px;margin-bottom:8px}.notes-banner-list{margin:0;padding:0;list-style:none;font-size:12px;color:#cbd5e1;line-height:1.7}.notes-banner-list li{padding:3px 0;position:relative;padding-inline-start:14px}.notes-banner-list li::before{content:"•";position:absolute;inset-inline-start:0;color:#fbbf24;font-weight:700}
 .weight-select{background:var(--accent-dim);border:1px solid var(--accent-border);border-radius:20px;padding:3px 22px 3px 22px;font-size:12px;font-family:'Heebo',Arial,sans-serif;color:#94a3b8;cursor:pointer;outline:none;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0l4 5 4-5z' fill='%23818cf8'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:left 7px center;line-height:1.4;min-height:38px}
 body.ltr .weight-select{padding:3px 22px 3px 8px;background-position:right 7px center}
 .weight-select.picked{color:var(--accent)}
@@ -271,7 +272,7 @@ var LANG={
     installTitle:'📲 הוסף למסך הבית',installSub:'גש ל-GYM PRO ישירות כמו אפליקציה',installBtn:'התקן',
     hintHTML:'<b>פורמטים נתמכים:</b><br>• <b>שם: X סטים, Y חזרות</b><br>• <b>שם — X×Y</b> או <b>שם X×Y</b><br>• <b>שם (X×Y)</b> או <b>שם | X סטים</b><br>• טקסט חופשי עם מספרים: <b>בנץ 4x10</b><br>• שורה עם כוכבית/מספר/מקף לפני השם<br>• <b>סופר-סט</b> בשורה נפרדת לפני תרגיל',
     placeholder:'אימון A — חזה + רגליים\nאימון משלב כוח\n* בנץ פרס: 4 סטים, 8-10 חזרות\n* סקוואט 4x6\n\nאימון B — זרועות\nסופר-סט לזרועות\nסופר-סט\n* כפיפת מרפקים: 3 סטים, 10-12 חזרות\n* פשיטת מרפקים: 3 סטים, 10-12 חזרות',
-    restDayLabel:'😴 יום מנוחה',planDeleted:'התוכנית נמחקה.',undoBtn:'↩ בטל',streakSuffix:' ימים 🔥',shareBtn:'📤 שתף תוכנית',shareCopied:'✓ הועתק ללוח',sumTitle:'🎉 אימון הושלם!',sumSubtitle:'כל הכבוד על האימון',sumExLbl:'תרגילים',sumTimeLbl:'דקות',sumPRsLbl:'🏆',sumStreakLbl:'רצף 🔥',sumClose:'סיום',prBadge:'🏆'
+    restDayLabel:'😴 יום מנוחה',planDeleted:'התוכנית נמחקה.',undoBtn:'↩ בטל',streakSuffix:' ימים 🔥',shareBtn:'📤 שתף תוכנית',shareCopied:'✓ הועתק ללוח',sumTitle:'🎉 אימון הושלם!',sumSubtitle:'כל הכבוד על האימון',sumExLbl:'תרגילים',sumTimeLbl:'דקות',sumPRsLbl:'🏆',sumStreakLbl:'רצף 🔥',sumClose:'סיום',notesBannerTitle:'הדגשים של האימון',prBadge:'🏆'
   },
   en:{
     editBtn:'Edit Plan',openPlan:'📂 Load Plan',loadBtn:'📂 Load Plan',deleteBtn:'🗑️ Clear',
@@ -285,7 +286,7 @@ var LANG={
     installTitle:'📲 Add to Home Screen',installSub:'Access GYM PRO like a native app',installBtn:'Install',
     hintHTML:'<b>Supported formats:</b><br>• <b>Name: X sets, Y reps</b><br>• <b>Name — X×Y</b> or <b>Name X×Y</b><br>• <b>Name (X×Y)</b> or <b>Name | X sets</b><br>• Free text with numbers: <b>Bench 4x10</b><br>• Lines starting with bullet/number/dash<br>• <b>superset</b> on its own line before an exercise',
     placeholder:'Workout A — Chest + Legs\nCombined strength session\n* Bench Press: 4 sets, 8-10 reps\n* Squat 4x6\n\nWorkout B — Arms\nSuperset for arms\nsuperset\n* Bicep Curl: 3 sets, 10-12 reps\n* Tricep Extension: 3 sets, 10-12 reps',
-    restDayLabel:'😴 Rest Day',planDeleted:'Plan deleted.',undoBtn:'↩ Undo',streakSuffix:' days 🔥',shareBtn:'📤 Share Plan',shareCopied:'✓ Copied!',sumTitle:'🎉 Workout Complete!',sumSubtitle:'Great job on your workout',sumExLbl:'exercises',sumTimeLbl:'minutes',sumPRsLbl:'🏆',sumStreakLbl:'streak 🔥',sumClose:'Done',prBadge:'🏆'
+    restDayLabel:'😴 Rest Day',planDeleted:'Plan deleted.',undoBtn:'↩ Undo',streakSuffix:' days 🔥',shareBtn:'📤 Share Plan',shareCopied:'✓ Copied!',sumTitle:'🎉 Workout Complete!',sumSubtitle:'Great job on your workout',sumExLbl:'exercises',sumTimeLbl:'minutes',sumPRsLbl:'🏆',sumStreakLbl:'streak 🔥',sumClose:'Done',notesBannerTitle:'Workout Notes',prBadge:'🏆'
   }
 };
 var curLang='he';try{curLang=localStorage.getItem('gym_lang')||'he';}catch(e){}
@@ -347,33 +348,78 @@ function cleanRawText(text){
  * parseWorkout — split into tab blocks, then parse each block
  */
 function parseWorkout(text){
-  // Split on 2+ blank lines
-  var blocks=text.split(/\n{2,}/);
-  var workouts=[],fi=0;
+  /* v2.2 — multi-line aware, notes banner, smart tab name */
+  text = text.replace(/^\[\d{1,2}:\d{2},\s*\d{1,2}\/\d{1,2}\/\d{2,4}\][^\n]*:[^\n]*\n?/gm, "");
+  var blocks = text.split(/\n{2,}/);
+  var workouts = [], fi = 0;
+  var junkWords = [String.fromCharCode(1491,1490,1513,1497,1501), String.fromCharCode(1492,1506,1512,1493,1514), String.fromCharCode(1502,1504,1493,1495,1492), String.fromCharCode(1489,1497,1510,1493,1506), String.fromCharCode(1514,1502,1508,1493), "notes?","tips?","rest","tempo","cue","cues","instructions?"].join("|");
+  var JUNK_PREFIX = new RegExp("^(" + junkWords + ")\\s*:", "i");
+  var S = String.fromCharCode(1505,1496,1497,1501);
+  var R = String.fromCharCode(1495,1494,1512,1493,1514);
+  var SH = String.fromCharCode(1513,1500);
+  var HAS_DATA = new RegExp("\\d+\\s*[x\u00d7*]\\s*\\d+|\\d+\\s*(?:" + S + "|" + R + "|sets?|reps?)", "i");
+  var HAS_NUMBER_PREFIX = /^\d+[\.\)\-:\s]/;
+  var SUPERSET = new RegExp(String.fromCharCode(1505,1493,1508,1512) + "[\\s\\-]*" + String.fromCharCode(1505,1496) + "|superset", "i");
+  var REST_RE = new RegExp(String.fromCharCode(1502,1504,1493,1495,1492) + "|rest\\s*day", "i");
+  var DATA_LABEL = new RegExp("^(" + S + "/?" + R + "?|" + R + "/?" + S + "?|sets?/?reps?)\\s*:?\\s*", "i");
+  var RANGE_PATTERN = new RegExp("(\\d+)(?:-(\\d+))?\\s*" + S + "\\s+" + SH + "\\s+(\\d+(?:-\\d+)?)\\s*" + R, "i");
+  var SETS_RANGE = new RegExp("(\\d+)-(\\d+)\\s*(" + S + "|sets?)", "i");
+  function normalizeData(str){
+    str = str.replace(RANGE_PATTERN, function(m, a, b, reps){ var sets = b || a; return sets + " " + S + ", " + reps + " " + R; });
+    str = str.replace(SETS_RANGE, function(m, a, b, w){ return b + " " + w; });
+    str = str.replace(/\.\s*$/, "");
+    return str.trim();
+  }
   blocks.forEach(function(block){
-    var lines=block.split('\n').map(function(l){return l.trim();}).filter(function(l){return l!=='';});
-    if(lines.length<1)return;
-    var tabName=lines[0].replace(/[💪🦵💡⚡🔥✅→►▶]/g,'').trim();
-    var exercises=[],descriptionLines=[],isSupersetMode=false;
-    for(var i=1;i<lines.length;i++){
-      var cl=lines[i];
-      // Superset marker
-      if(/^(סופר-?סט|superset)$/i.test(cl)){isSupersetMode=true;continue;}
-      // First line after tab name with no exercises yet and no bullet/number → description
-      var hasBulletOrNum=/^[💪🦵✅▶►→•·◦●\*\-–—]/.test(cl)||/^\d+[\.\)\-:\s]/.test(cl)||/^[א-וא-ת][\.\)]/.test(cl);
-      var hasSetRep=/\d+\s*(?:סטים|sets?|חזרות|reps?)/i.test(cl)||/\d+\s*[xX×]\s*\d+/.test(cl);
-      if(i===1&&exercises.length===0&&!hasBulletOrNum&&!hasSetRep){descriptionLines.push(cl);continue;}
-      var card=createExerciseCard(cl,isSupersetMode);
-      if(card){exercises.push(card);isSupersetMode=false;}
-      else if(exercises.length===0){descriptionLines.push(cl);}
+    var rawLines = block.split("\n").map(function(l){return l.trim();}).filter(function(l){return l !== "";});
+    if(rawLines.length < 1) return;
+    var tabFull = rawLines[0];
+    var shortName = tabFull;
+    var cutMatch = tabFull.match(/^([^:\-\u2013\u2014]+)[:\-\u2013\u2014]/);
+    if(cutMatch && cutMatch[1].trim().length > 0 && cutMatch[1].trim().length <= 20){
+      shortName = cutMatch[1].trim();
     }
-        var isRest=/מנוחה|rest\s*day/i.test(tabName+' '+descriptionLines.join(' '))&&exercises.length===0;
-    if(exercises.length>0||isRest){
-      var lb=makeLabels(tabName,fi++);
-      workouts.push({fullName:lb.full,sh:lb.sh,tabDescription:descriptionLines.join(' | '),exercises:exercises,isRestDay:isRest&&exercises.length===0});
+    shortName = shortName.trim();
+    var exercises = [], notes = [], descriptionLines = [], supersetMode = false;
+    var merged = [];
+    for(var i = 1; i < rawLines.length; i++){
+      var cur = rawLines[i];
+      var nxt = rawLines[i+1] || "";
+      if(JUNK_PREFIX.test(cur)){ notes.push(cur); continue; }
+      if(SUPERSET.test(cur)){ merged.push({type:"superset", text:cur}); continue; }
+      var curHasData = HAS_DATA.test(cur);
+      var nxtHasData = HAS_DATA.test(nxt);
+      var nxtIsJunk = JUNK_PREFIX.test(nxt);
+      var curLooksLikeName = cur.length > 2 && !HAS_NUMBER_PREFIX.test(cur);
+      if(!curHasData && curLooksLikeName && nxtHasData && !nxtIsJunk && nxt){
+        var cleanData = nxt.replace(DATA_LABEL, "").trim();
+        cleanData = normalizeData(cleanData);
+        merged.push({type:"ex", text:cur.trim() + ": " + cleanData});
+        i++;
+      } else {
+        merged.push({type:"ex", text:normalizeData(cur)});
+      }
+    }
+    merged.forEach(function(item){
+      if(item.type === "superset"){ supersetMode = true; return; }
+      var card = createExerciseCard(item.text, supersetMode);
+      if(card){ exercises.push(card); }
+      else if(exercises.length === 0){ descriptionLines.push(item.text); }
+    });
+    var isRest = REST_RE.test(tabFull + " " + descriptionLines.join(" ")) && exercises.length === 0;
+    if(exercises.length > 0 || isRest){
+      var lb = makeLabels(tabFull, fi++);
+      workouts.push({fullName:tabFull, shortName:shortName, exercises:exercises, isRestDay:isRest, notes:notes, icon:lb.icon, desc:descriptionLines.join(" ")});
     }
   });
-  return workouts;
+  var final = [];
+  workouts.forEach(function(d){
+    if(d.exercises.length === 0 && !d.isRestDay && final.length > 0){
+      final[final.length-1].notes = (final[final.length-1].notes||[]).concat(d.notes||[]);
+      if(d.desc) final[final.length-1].desc += " " + d.desc;
+    } else { final.push(d); }
+  });
+  return final;
 }
 
 /**
@@ -724,7 +770,7 @@ function renderTabs(){
     var d=plan[i],total=d.exercises.length,dc=0;
     for(var j=0;j<d.exercises.length;j++){if(done[i+'_'+j])dc++;}
     var prog=dc>0?'<span style="display:block;color:var(--accent);font-size:10px;margin-top:2px">'+dc+'/'+total+'</span>':'';
-    var meta=getTabMeta(d.fullName,d.exercises);
+    var meta=getTabMeta(d.shortName || d.fullName,d.exercises);
     var icons=getCatIcons(d.exercises);
     var iconsHtml=(meta.isDay||/\p{Emoji}/u.test(meta.label))?'':
       (icons?'<span style="display:block;font-size:12px;line-height:1.4;margin-top:1px">'+icons+'</span>':'');
@@ -783,6 +829,15 @@ function renderDay(){
     +'</div>';
   }
   html+='</div>';
+  /* v2.2: Notes banner */
+  var curD = plan[curDay];
+  if(curD && curD.notes && curD.notes.length > 0){
+    var bt = (typeof T!=='undefined' && T.notesBannerTitle) ? T.notesBannerTitle : 'Workout Notes';
+    var bHtml = '<div class="notes-banner"><div class="notes-banner-title">💡 '+esc(bt)+'</div><ul class="notes-banner-list">';
+    curD.notes.forEach(function(n){ bHtml += '<li>'+esc(n)+'</li>'; });
+    bHtml += '</ul></div>';
+    html += bHtml;
+  }
   content.innerHTML=html;
 }
 
