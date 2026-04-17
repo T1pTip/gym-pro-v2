@@ -264,7 +264,7 @@ var LANG={
     installTitle:'📲 הוסף למסך הבית',installSub:'גש ל-GYM PRO ישירות כמו אפליקציה',installBtn:'התקן',
     hintHTML:'<b>פורמטים נתמכים:</b><br>• <b>שם: X סטים, Y חזרות</b><br>• <b>שם — X×Y</b> או <b>שם X×Y</b><br>• <b>שם (X×Y)</b> או <b>שם | X סטים</b><br>• טקסט חופשי עם מספרים: <b>בנץ 4x10</b><br>• שורה עם כוכבית/מספר/מקף לפני השם<br>• <b>סופר-סט</b> בשורה נפרדת לפני תרגיל',
     placeholder:'אימון A — חזה + רגליים\nאימון משלב כוח\n* בנץ פרס: 4 סטים, 8-10 חזרות\n* סקוואט 4x6\n\nאימון B — זרועות\nסופר-סט לזרועות\nסופר-סט\n* כפיפת מרפקים: 3 סטים, 10-12 חזרות\n* פשיטת מרפקים: 3 סטים, 10-12 חזרות',
-    restDayLabel:'😴 יום מנוחה',planDeleted:'התוכנית נמחקה.',undoBtn:'↩ בטל',streakSuffix:' ימים 🔥',shareBtn:'📤 שתף תוכנית',shareCopied:'✓ הועתק ללוח',sumTitle:'🎉 אימון הושלם!',sumSubtitle:'כל הכבוד על האימון',sumExLbl:'תרגילים',sumTimeLbl:'דקות',sumPRsLbl:'שיאים 🏆',sumStreakLbl:'רצף 🔥',sumClose:'סיום',prBadge:'🏆 שיא!'
+    restDayLabel:'😴 יום מנוחה',planDeleted:'התוכנית נמחקה.',undoBtn:'↩ בטל',streakSuffix:' ימים 🔥',shareBtn:'📤 שתף תוכנית',shareCopied:'✓ הועתק ללוח',sumTitle:'🎉 אימון הושלם!',sumSubtitle:'כל הכבוד על האימון',sumExLbl:'תרגילים',sumTimeLbl:'דקות',sumPRsLbl:'🏆',sumStreakLbl:'רצף 🔥',sumClose:'סיום',prBadge:'🏆'
   },
   en:{
     editBtn:'Edit Plan',openPlan:'📂 Load Plan',loadBtn:'📂 Load Plan',deleteBtn:'🗑️ Clear',
@@ -278,7 +278,7 @@ var LANG={
     installTitle:'📲 Add to Home Screen',installSub:'Access GYM PRO like a native app',installBtn:'Install',
     hintHTML:'<b>Supported formats:</b><br>• <b>Name: X sets, Y reps</b><br>• <b>Name — X×Y</b> or <b>Name X×Y</b><br>• <b>Name (X×Y)</b> or <b>Name | X sets</b><br>• Free text with numbers: <b>Bench 4x10</b><br>• Lines starting with bullet/number/dash<br>• <b>superset</b> on its own line before an exercise',
     placeholder:'Workout A — Chest + Legs\nCombined strength session\n* Bench Press: 4 sets, 8-10 reps\n* Squat 4x6\n\nWorkout B — Arms\nSuperset for arms\nsuperset\n* Bicep Curl: 3 sets, 10-12 reps\n* Tricep Extension: 3 sets, 10-12 reps',
-    restDayLabel:'😴 Rest Day',planDeleted:'Plan deleted.',undoBtn:'↩ Undo',streakSuffix:' days 🔥',shareBtn:'📤 Share Plan',shareCopied:'✓ Copied!',sumTitle:'🎉 Workout Complete!',sumSubtitle:'Great job on your workout',sumExLbl:'exercises',sumTimeLbl:'minutes',sumPRsLbl:'PRs 🏆',sumStreakLbl:'streak 🔥',sumClose:'Done',prBadge:'🏆 PR!'
+    restDayLabel:'😴 Rest Day',planDeleted:'Plan deleted.',undoBtn:'↩ Undo',streakSuffix:' days 🔥',shareBtn:'📤 Share Plan',shareCopied:'✓ Copied!',sumTitle:'🎉 Workout Complete!',sumSubtitle:'Great job on your workout',sumExLbl:'exercises',sumTimeLbl:'minutes',sumPRsLbl:'🏆',sumStreakLbl:'streak 🔥',sumClose:'Done',prBadge:'🏆'
   }
 };
 var curLang='he';try{curLang=localStorage.getItem('gym_lang')||'he';}catch(e){}
@@ -978,7 +978,7 @@ function showSummary(exCount,prCount){
     document.getElementById('sumTime').textContent=fmtTime(getWorkoutElapsed());
     document.getElementById('sumTimeLbl').textContent=T2.sumTimeLbl||'minutes';
     document.getElementById('sumPRs').textContent=prCount||0;
-    document.getElementById('sumPRsLbl').textContent=T2.sumPRsLbl||'PRs';
+    document.getElementById('sumPRsLbl').textContent=T2.sumPRsLbl||'🏆';
     var streak=0;
     try{var st=JSON.parse(localStorage.getItem('gym_streak')||'{}');streak=st.count||0;}catch(e){}
     document.getElementById('sumStreak').textContent=streak;
@@ -1026,7 +1026,7 @@ function recordPR(exName){
               if(!c.querySelector('.pr-badge')){
                 var b=document.createElement('span');
                 b.className='pr-badge';
-                b.textContent=((typeof T!=='undefined')?T.prBadge:null)||'🏆 PR!';
+                b.textContent=((typeof T!=='undefined')?T.prBadge:null)||'🏆';
                 c.appendChild(b);
               }
             }
@@ -1077,7 +1077,7 @@ function recordPR(exName){
     <div class="summary-stats">
       <div class="summary-stat"><div class="summary-stat-val" id="sumExCount">0</div><div class="summary-stat-lbl" id="sumExLbl">תרגילים</div></div>
       <div class="summary-stat"><div class="summary-stat-val" id="sumTime">0:00</div><div class="summary-stat-lbl" id="sumTimeLbl">דקות</div></div>
-      <div class="summary-stat"><div class="summary-stat-val" id="sumPRs">0</div><div class="summary-stat-lbl" id="sumPRsLbl">שיאים 🏆</div></div>
+      <div class="summary-stat"><div class="summary-stat-val" id="sumPRs">0</div><div class="summary-stat-lbl" id="sumPRsLbl">🏆</div></div>
       <div class="summary-stat"><div class="summary-stat-val" id="sumStreak">0</div><div class="summary-stat-lbl" id="sumStreakLbl">רצף 🔥</div></div>
     </div>
     <button class="summary-close" id="summaryCloseBtn" onclick="closeSummary()">סיום</button>
