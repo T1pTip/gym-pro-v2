@@ -89,6 +89,7 @@ body.ltr .edit-panel textarea{direction:ltr}
 .pr-badge{position:absolute;top:8px;right:-4px;background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#0d0f1a;font-size:11px;font-weight:800;padding:2px 6px;border-radius:8px;letter-spacing:.5px;box-shadow:0 2px 8px rgba(251,191,36,0.4);z-index:5;animation:pr-pop .4s ease}@keyframes pr-pop{0%{transform:scale(0)}60%{transform:scale(1.2)}100%{transform:scale(1)}}.ex-row.pr-card{border-color:rgba(251,191,36,0.4);position:relative}body.ltr .pr-badge{right:auto;left:-4px}
 .work-dur{display:none;position:absolute;top:10px;left:50%;transform:translateX(-50%);background:rgba(52,211,153,0.1);border:1px solid rgba(52,211,153,0.3);color:#34d399;font-size:11px;font-weight:700;padding:3px 10px;border-radius:14px;letter-spacing:.3px;pointer-events:none;z-index:50}.work-dur.active{display:block}
 .summary-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:1000;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(8px)}.summary-overlay.open{display:flex;animation:fade-in .25s ease}@keyframes fade-in{from{opacity:0}to{opacity:1}}.summary-card{background:#13151f;border:1px solid var(--accent-border);border-radius:20px;padding:30px 24px;max-width:340px;width:100%;text-align:center;position:relative;animation:pop-in .3s ease}@keyframes pop-in{0%{transform:scale(0.8);opacity:0}100%{transform:scale(1);opacity:1}}.summary-card h2{font-size:28px;color:var(--accent);margin-bottom:8px}.summary-stats{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:20px 0}.summary-stat{background:#1e2235;border-radius:12px;padding:12px}.summary-stat-val{font-size:24px;font-weight:800;color:#fff}.summary-stat-lbl{font-size:11px;color:var(--muted);margin-top:2px}.summary-close{background:var(--accent);color:#fff;border:none;padding:12px 28px;border-radius:16px;font-size:15px;font-weight:700;cursor:pointer;margin-top:8px;font-family:inherit}
+.start-workout-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;background:linear-gradient(135deg,#34d399,#10b981);color:#0d0f1a;border:none;padding:12px 16px;border-radius:12px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;margin-bottom:12px;transition:.2s}.start-workout-btn:active{transform:scale(0.98)}.start-workout-btn.active{background:rgba(52,211,153,0.12);border:1px solid rgba(52,211,153,0.35);color:#34d399;cursor:default}.start-workout-btn.active:active{transform:none}.sum-stat-unmeasured{background:rgba(251,191,36,0.08);border:1px dashed rgba(251,191,36,0.25)}.sum-stat-unmeasured .summary-stat-val{font-size:13px;color:#fbbf24}
 .notes-banner{background:linear-gradient(135deg,rgba(251,191,36,0.1),rgba(245,158,11,0.05));border:1px solid rgba(251,191,36,0.3);border-radius:12px;padding:14px;margin-top:16px}.notes-banner-title{display:flex;align-items:center;gap:6px;color:#fbbf24;font-weight:800;font-size:13px;margin-bottom:8px}.notes-banner-list{margin:0;padding:0;list-style:none;font-size:12px;color:#cbd5e1;line-height:1.7}.notes-banner-list li{padding:3px 0;position:relative;padding-inline-start:14px}.notes-banner-list li::before{content:"•";position:absolute;inset-inline-start:0;color:#fbbf24;font-weight:700}
 .weight-select{background:var(--accent-dim);border:1px solid var(--accent-border);border-radius:20px;padding:3px 22px 3px 22px;font-size:12px;font-family:'Heebo',Arial,sans-serif;color:#94a3b8;cursor:pointer;outline:none;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0l4 5 4-5z' fill='%23818cf8'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:left 7px center;line-height:1.4;min-height:38px}
 body.ltr .weight-select{padding:3px 22px 3px 8px;background-position:right 7px center}
@@ -272,7 +273,7 @@ var LANG={
     installTitle:'📲 הוסף למסך הבית',installSub:'גש ל-GYM PRO ישירות כמו אפליקציה',installBtn:'התקן',
     hintHTML:'<b>פורמטים נתמכים:</b><br>• <b>שם: X סטים, Y חזרות</b><br>• <b>שם — X×Y</b> או <b>שם X×Y</b><br>• <b>שם (X×Y)</b> או <b>שם | X סטים</b><br>• טקסט חופשי עם מספרים: <b>בנץ 4x10</b><br>• שורה עם כוכבית/מספר/מקף לפני השם<br>• <b>סופר-סט</b> בשורה נפרדת לפני תרגיל',
     placeholder:'אימון A — חזה + רגליים\nאימון משלב כוח\n* בנץ פרס: 4 סטים, 8-10 חזרות\n* סקוואט 4x6\n\nאימון B — זרועות\nסופר-סט לזרועות\nסופר-סט\n* כפיפת מרפקים: 3 סטים, 10-12 חזרות\n* פשיטת מרפקים: 3 סטים, 10-12 חזרות',
-    restDayLabel:'😴 יום מנוחה',planDeleted:'התוכנית נמחקה.',undoBtn:'↩ בטל',streakSuffix:' ימים 🔥',shareBtn:'📤 שתף תוכנית',shareCopied:'✓ הועתק ללוח',sumTitle:'🎉 אימון הושלם!',sumSubtitle:'כל הכבוד על האימון',sumExLbl:'תרגילים',sumTimeLbl:'דקות',sumPRsLbl:'🏆',sumStreakLbl:'רצף 🔥',sumClose:'סיום',notesBannerTitle:'הדגשים של האימון',prBadge:'🏆'
+    restDayLabel:'😴 יום מנוחה',planDeleted:'התוכנית נמחקה.',undoBtn:'↩ בטל',streakSuffix:' ימים 🔥',shareBtn:'📤 שתף תוכנית',shareCopied:'✓ הועתק ללוח',sumTitle:'🎉 אימון הושלם!',sumSubtitle:'כל הכבוד על האימון',sumExLbl:'תרגילים',sumTimeLbl:'דקות',sumPRsLbl:'🏆',sumStreakLbl:'רצף 🔥',sumClose:'סיום',notesBannerTitle:'הדגשים של האימון',startWorkoutBtn:'▶ התחל אימון',startWorkoutBtnActive:'� אימון בתהליך',timeNotMeasured:'⌛ לא נמדד',prBadge:'🏆'
   },
   en:{
     editBtn:'Edit Plan',openPlan:'📂 Load Plan',loadBtn:'📂 Load Plan',deleteBtn:'🗑️ Clear',
@@ -286,7 +287,7 @@ var LANG={
     installTitle:'📲 Add to Home Screen',installSub:'Access GYM PRO like a native app',installBtn:'Install',
     hintHTML:'<b>Supported formats:</b><br>• <b>Name: X sets, Y reps</b><br>• <b>Name — X×Y</b> or <b>Name X×Y</b><br>• <b>Name (X×Y)</b> or <b>Name | X sets</b><br>• Free text with numbers: <b>Bench 4x10</b><br>• Lines starting with bullet/number/dash<br>• <b>superset</b> on its own line before an exercise',
     placeholder:'Workout A — Chest + Legs\nCombined strength session\n* Bench Press: 4 sets, 8-10 reps\n* Squat 4x6\n\nWorkout B — Arms\nSuperset for arms\nsuperset\n* Bicep Curl: 3 sets, 10-12 reps\n* Tricep Extension: 3 sets, 10-12 reps',
-    restDayLabel:'😴 Rest Day',planDeleted:'Plan deleted.',undoBtn:'↩ Undo',streakSuffix:' days 🔥',shareBtn:'📤 Share Plan',shareCopied:'✓ Copied!',sumTitle:'🎉 Workout Complete!',sumSubtitle:'Great job on your workout',sumExLbl:'exercises',sumTimeLbl:'minutes',sumPRsLbl:'🏆',sumStreakLbl:'streak 🔥',sumClose:'Done',notesBannerTitle:'Workout Notes',prBadge:'🏆'
+    restDayLabel:'😴 Rest Day',planDeleted:'Plan deleted.',undoBtn:'↩ Undo',streakSuffix:' days 🔥',shareBtn:'📤 Share Plan',shareCopied:'✓ Copied!',sumTitle:'🎉 Workout Complete!',sumSubtitle:'Great job on your workout',sumExLbl:'exercises',sumTimeLbl:'minutes',sumPRsLbl:'🏆',sumStreakLbl:'streak 🔥',sumClose:'Done',notesBannerTitle:'Workout Notes',startWorkoutBtn:'▶ Start Workout',startWorkoutBtnActive:'🏋️ Workout in Progress',timeNotMeasured:'⏱ Not measured',prBadge:'🏆'
   }
 };
 var curLang='he';try{curLang=localStorage.getItem('gym_lang')||'he';}catch(e){}
@@ -829,6 +830,13 @@ function renderDay(){
     +'</div>';
   }
   html+='</div>';
+  /* v2.2: Start Workout button (prepended) */
+  var swT = (typeof T!=='undefined') ? T : {};
+  var swActive = !!localStorage.getItem(WDUR_KEY);
+  var swLabel = swActive ? (swT.startWorkoutBtnActive||'🏋️ Workout in Progress') : (swT.startWorkoutBtn||'▶ Start Workout');
+  var swClass = swActive ? 'start-workout-btn active' : 'start-workout-btn';
+  var swBtnHtml = '<button id="startWorkoutBtn" class="'+swClass+'" onclick="handleStartWorkout()"' + (swActive?' disabled':'') + '>'+esc(swLabel)+'</button>';
+  html = swBtnHtml + html;
   /* v2.2: Notes banner */
   var curD = plan[curDay];
   if(curD && curD.notes && curD.notes.length > 0){
@@ -1006,6 +1014,33 @@ function showWorkDur(){
   tick();
   wdurInt=setInterval(tick,1000);
 }
+
+function handleStartWorkout(){
+  try{
+    var existing = localStorage.getItem(WDUR_KEY);
+    if(existing){ return; } /* already started, ignore */
+    localStorage.setItem(WDUR_KEY, Date.now().toString());
+    showWorkDur();
+    updateStartBtnState();
+    try{navigator.vibrate&&navigator.vibrate(40);}catch(e){}
+  }catch(e){console.log('startWorkout err:',e);}
+}
+function updateStartBtnState(){
+  var btn = document.getElementById('startWorkoutBtn');
+  if(!btn) return;
+  var active = !!localStorage.getItem(WDUR_KEY);
+  var T2 = (typeof T!=='undefined') ? T : {};
+  if(active){
+    btn.classList.add('active');
+    btn.textContent = T2.startWorkoutBtnActive || '🏋️ Workout in Progress';
+    btn.disabled = true;
+  } else {
+    btn.classList.remove('active');
+    btn.textContent = T2.startWorkoutBtn || '▶ Start Workout';
+    btn.disabled = false;
+  }
+}
+
 function hideWorkDur(){
   var el=document.getElementById('workDur');
   if(el)el.classList.remove('active');
@@ -1031,7 +1066,7 @@ function showSummary(exCount,prCount){
     document.getElementById('summarySubtitle').textContent=T2.sumSubtitle||'';
     document.getElementById('sumExCount').textContent=exCount||0;
     document.getElementById('sumExLbl').textContent=T2.sumExLbl||'exercises';
-    document.getElementById('sumTime').textContent=fmtTime(getWorkoutElapsed());
+    var hasTimer=!!localStorage.getItem(WDUR_KEY);var sumTimeEl=document.getElementById('sumTime');var sumTimeLblEl=document.getElementById('sumTimeLbl');var sumTimeCell=sumTimeEl&&sumTimeEl.closest('.summary-stat');if(hasTimer){sumTimeEl.textContent=fmtTime(getWorkoutElapsed());if(sumTimeCell)sumTimeCell.classList.remove('sum-stat-unmeasured');}else{sumTimeEl.textContent=(T2.timeNotMeasured||'⏱ Not measured');sumTimeEl.style.fontSize='13px';if(sumTimeLblEl)sumTimeLblEl.textContent='';if(sumTimeCell)sumTimeCell.classList.add('sum-stat-unmeasured');}
     document.getElementById('sumTimeLbl').textContent=T2.sumTimeLbl||'minutes';
     document.getElementById('sumPRs').textContent=prCount||0;
     document.getElementById('sumPRsLbl').textContent=T2.sumPRsLbl||'🏆';
@@ -1098,7 +1133,6 @@ function recordPR(exName){
   if(typeof toggleDone==='function'){
     var orig=toggleDone;
     window.toggleDone=function(){
-      startWorkout();
       var r=orig.apply(this,arguments);
       setTimeout(function(){
         try{
