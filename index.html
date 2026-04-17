@@ -444,7 +444,9 @@ function parseWorkout(text){
       var nxtHasData = HAS_DATA.test(nxt);
       var nxtIsJunk = JUNK_PREFIX.test(nxt);
       var curLooksLikeName = cur.length > 2 && !HAS_NUMBER_PREFIX.test(cur);
-      if(!curHasData && curLooksLikeName && nxtHasData && !nxtIsJunk && nxt){
+      var nxtIsNumbered = HAS_NUMBER_PREFIX.test(nxt);
+      var curIsLongDescr = cur.length > 80 || /[.!?]$/.test(cur);
+      if(!curHasData && curLooksLikeName && !curIsLongDescr && nxtHasData && !nxtIsJunk && !nxtIsNumbered && nxt){
         var cleanData = nxt.replace(DATA_LABEL, "").trim();
         cleanData = normalizeData(cleanData);
         merged.push({type:"ex", name:cur.trim(), data:cleanData});
