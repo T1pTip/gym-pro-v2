@@ -1032,9 +1032,9 @@ function recordPR(exName){
 })();
 
 (function(){
-  if(typeof markDone==='function'){
-    var orig=markDone;
-    window.markDone=function(){
+  if(typeof toggleDone==='function'){
+    var orig=toggleDone;
+    window.toggleDone=function(){
       startWorkout();
       var r=orig.apply(this,arguments);
       setTimeout(function(){
