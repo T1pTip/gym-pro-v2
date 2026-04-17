@@ -182,6 +182,14 @@ body.ltr .dropdown-menu{left:auto;right:0}
 .lang-toggle-row{display:flex;gap:0;border-radius:20px;overflow:hidden;border:1px solid var(--border);background:var(--card2)}
 .lang-toggle-row button{padding:6px 14px;border:none;background:transparent;color:var(--muted);font-size:12px;font-weight:700;font-family:'Heebo',Arial,sans-serif;cursor:pointer;transition:.15s}
 .lang-toggle-row button.active{background:var(--accent);color:#fff}
+
+/* ═══ PayBox Smart FAB ═══ */
+.pb-float{position:fixed;bottom:20px;left:20px;z-index:50;width:56px;height:56px;display:flex;align-items:center;justify-content:center;padding:0;background:#1a0f00;border:1px solid rgba(255,165,0,0.4);border-radius:50%;cursor:pointer;transition:background .15s,transform .3s cubic-bezier(.34,1.56,.64,1),opacity .3s,visibility .3s;touch-action:manipulation;box-shadow:0 4px 16px rgba(0,0,0,0.4),0 0 0 1px rgba(255,165,0,0.1);font-family:inherit}
+.pb-float:active{background:#241400;transform:scale(0.92)}
+.pb-float.pb-hidden{opacity:0;visibility:hidden;transform:translateY(80px) scale(0.8);pointer-events:none}
+.pb-float-emoji-wrap{width:40px;height:40px;background:rgba(255,165,0,0.12);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.pb-float-emoji{font-size:22px;line-height:1}
+@media (max-width:420px){.pb-float{bottom:16px;left:16px;width:52px;height:52px}.pb-float-emoji-wrap{width:36px;height:36px}.pb-float-emoji{font-size:20px}}
 </style>
 </head>
 <body class="rtl">
@@ -1072,6 +1080,50 @@ function recordPR(exName){
 })();
 
 
+
+// ═══ PayBox + Install Tracker ═══
+var PAYBOX_URL = "https://links.payboxapp.com/hbbbRHMn91b";
+function doPayBox() { window.open(PAYBOX_URL, '_blank', 'noopener,noreferrer'); }
+
+(function initSmartFAB() {
+  var fab = document.getElementById('pbFloatBtn');
+  if (!fab) return;
+  var lastY = window.scrollY || 0;
+  var scrollTimer = null;
+  window.addEventListener('scroll', function() {
+    var y = window.scrollY || 0;
+    var diff = y - lastY;
+    if (Math.abs(diff) > 8) {
+      if (diff > 0 && y > 80) fab.classList.add('pb-hidden');
+      else fab.classList.remove('pb-hidden');
+      lastY = y;
+    }
+    clearTimeout(scrollTimer);
+    scrollTimer = setTimeout(function() { fab.classList.remove('pb-hidden'); }, 500);
+  }, { passive: true });
+})();
+
+var TRACKER_URL = "https://script.google.com/macros/s/AKfycbw4T2BKICMlJLgCGWuEPUpbuMtAyy0qD3zGNpwHVISyvzZnG9dW8i18Becg-QdPWfqm/exec";
+var TRACKER_KEY = "gym_tracked";
+function trackInstall() {
+  try {
+    if (localStorage.getItem(TRACKER_KEY)) return;
+    var isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+    if (!isStandalone) return;
+    var ua = navigator.userAgent || '';
+    var device = /iPhone|iPad|iPod/i.test(ua) ? 'iOS' : /Android/i.test(ua) ? 'Android' : /Mac/i.test(ua) ? 'Mac' : /Windows/i.test(ua) ? 'Windows' : 'Other';
+    var lang = document.documentElement.lang || 'he';
+    var params = new URLSearchParams({ app: 'gym-pro', lang: lang, device: device, version: 'gym-pro-v2', ua: ua.slice(0, 200) });
+    fetch(TRACKER_URL + '?' + params.toString(), { method: 'GET', mode: 'no-cors' })
+      .then(function() { localStorage.setItem(TRACKER_KEY, '1'); console.log('[GYM PRO] install tracked'); })
+      .catch(function(err) { console.warn('[GYM PRO] tracker:', err); });
+  } catch(e) { console.warn('[GYM PRO] tracker error:', e); }
+}
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', function() { setTimeout(trackInstall, 1000); });
+} else {
+  setTimeout(trackInstall, 1000);
+}
 </script>
 <div class="work-dur" id="workDur">⏱ 00:00</div>
 <div class="summary-overlay" id="summaryOverlay">
@@ -1087,5 +1139,12 @@ function recordPR(exName){
     <button class="summary-close" id="summaryCloseBtn" onclick="closeSummary()">סיום</button>
   </div>
 </div>
+
+<!-- PayBox Donation Button (Smart FAB) -->
+<button class="pb-float" id="pbFloatBtn" onclick="doPayBox()" aria-label="תמכו בפיתוח" title="🍺 אהבתם? פנקו בבירה">
+  <div class="pb-float-emoji-wrap">
+    <span class="pb-float-emoji">🍺</span>
+  </div>
+</button>
 </body>
 </html>
