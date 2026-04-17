@@ -866,9 +866,10 @@ function renderDay(){
     var saved=weights[wk(curDay,j)]||'';
     var ytUrl='https://www.youtube.com/results?search_query='+encodeURIComponent(ex.name+' exercise tutorial');
     var wB=ab?'':'<select id="ws_'+curDay+'_'+j+'" class="weight-select'+(saved?' picked':'')+'" onchange="onWeightChange('+curDay+','+j+',this.value,\''+encodeURIComponent(ex.name)+'\')">'+buildOpts(saved)+'</select>';
+    var chipsHtml='';if(ex.suggestedWeight)chipsHtml+='<span class="ex-chip w">🏋 '+esc(ex.suggestedWeight)+'</span>';if(ex.intensity)chipsHtml+='<span class="ex-chip int">'+esc(ex.intensity)+'</span>';if(ex.rpe)chipsHtml+='<span class="ex-chip rpe">'+esc(ex.rpe)+'</span>';if(ex.tempo)chipsHtml+='<span class="ex-chip">Tempo '+esc(ex.tempo)+'</span>';if(chipsHtml)chipsHtml='<div class="ex-chips">'+chipsHtml+'</div>';
     var catLabel=ex.cat?(curLang==='he'?ex.cat.he:ex.cat.en):'';
     var ssTag=ex.isSuperset?'<span class="ss-badge">'+T.supersetLbl+'</span>':'';
-    var pNote=ex.weekVariants&&isPW?'<div class="power-note">'+T.powerNote+dispSets+' '+T.sets.toLowerCase()+', '+dispReps+' '+T.reps.toLowerCase()+(function(){var c='';if(ex.suggestedWeight)c+='<span class="ex-chip w">🏋 '+esc(ex.suggestedWeight)+'</span>';if(ex.intensity)c+='<span class="ex-chip int">'+esc(ex.intensity)+'</span>';if(ex.rpe)c+='<span class="ex-chip rpe">'+esc(ex.rpe)+'</span>';if(ex.tempo)c+='<span class="ex-chip">Tempo '+esc(ex.tempo)+'</span>';return c?'<div class="ex-chips">'+c+'</div>':'';})()+'</div>':'';
+    var pNote=ex.weekVariants&&isPW?'<div class="power-note">'+T.powerNote+dispSets+' '+T.sets.toLowerCase()+', '+dispReps+' '+T.reps.toLowerCase()+'</div>':'';
     var rowClass='ex-row'+(isDone?' done':'')+(ex.isSuperset?' superset':'')+(ex.weekVariants&&isPW?' power-week':'');
     var enc=encodeURIComponent(ex.name);
     html+='<div class="'+rowClass+'" id="row_'+j+'">'
@@ -879,6 +880,7 @@ function renderDay(){
           +'<div class="badge">'+T.setsLabel+'<b>'+dispSets+'</b></div>'
           +'<div class="badge">'+T.repsLabel+'<b>'+dispReps+'</b></div>'
           +wB
+          +chipsHtml
           +'<div class="ex-actions">'
             +'<button class="hist-btn" onclick="openHistModal(\''+enc+'\')" title="History">&#128200;</button>'
             +'<a class="yt-btn" href="'+ytUrl+'" target="_blank" title="YouTube">'+YT_SVG+'</a>'
