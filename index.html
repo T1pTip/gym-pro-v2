@@ -352,6 +352,8 @@ function cleanRawText(text){
 function parseWorkout(text){
   /* v2.5: Weight + Tempo/RPE extraction + smart tab naming */
   text = text.replace(/^\[\d{1,2}:\d{2},\s*\d{1,2}\/\d{1,2}\/\d{2,4}\]\s*[^:\n]+:\s*/gm, "");
+  /* v2.5.1: strip lone surrogates (broken emojis) */
+  text = text.replace(/[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:[^\uD800-\uDBFF]|^)[\uDC00-\uDFFF]/g, "");
   var workouts = [], fi = 0;
   var HE_IMUN = String.fromCharCode(1488,1497,1502,1493,1503);
   var HE_YOM = String.fromCharCode(1497,1493,1501);
@@ -359,7 +361,7 @@ function parseWorkout(text){
   var HE_KG = String.fromCharCode(1511,1490);
   var HE_KG_Q = String.fromCharCode(1511,34,1490);
   var HE_KILO = String.fromCharCode(1511,1497,1500,1493);
-  var dayHeaderRe = new RegExp("^(" + HE_IMUN + "|" + HE_YOM + "|day|workout)\\s+[A-Za-z0-9\u05D0-\u05EA]+", "i");
+  var dayHeaderRe = new RegExp("^[^A-Za-z\u05D0-\u05EA]*(" + HE_IMUN + "|" + HE_YOM + "|day|workout)\\s+[A-Za-z0-9\u05D0-\u05EA]+", "i");
   var junkWords = [String.fromCharCode(1491,1490,1513,1497,1501), String.fromCharCode(1492,1506,1512,1493,1514), HE_MENUCHA, "notes?","tips?","rest","tempo","cue","cues","instructions?"].join("|");
   var JUNK_PREFIX = new RegExp("^(" + junkWords + ")\\s*:", "i");
   var S = String.fromCharCode(1505,1496,1497,1501);
@@ -406,7 +408,7 @@ function parseWorkout(text){
   allLines.forEach(function(line){
     if(dayHeaderRe.test(line)){
       if(current) blocks.push(current);
-      current = {header:line, lines:[]};
+      current = {header:line.replace(/^[^A-Za-z\u05D0-\u05EA]+/, "").trim(), lines:[]};
     } else {
       if(!current) current = {header:null, lines:[]};
       current.lines.push(line);
