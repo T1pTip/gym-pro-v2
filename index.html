@@ -349,20 +349,26 @@ function cleanRawText(text){
  * parseWorkout — split into tab blocks, then parse each block
  */
 function parseWorkout(text){
-  /* v2.2 — multi-line aware, notes banner, smart tab name */
+  /* v2.4: Content-based day header detection (no dependency on blank lines) */
   text = text.replace(/^\[\d{1,2}:\d{2},\s*\d{1,2}\/\d{1,2}\/\d{2,4}\]\s*[^:\n]+:\s*/gm, "");
-  var blocks = text.split(/\n{2,}/);
   var workouts = [], fi = 0;
-  var junkWords = [String.fromCharCode(1491,1490,1513,1497,1501), String.fromCharCode(1492,1506,1512,1493,1514), String.fromCharCode(1502,1504,1493,1495,1492), String.fromCharCode(1489,1497,1510,1493,1506), String.fromCharCode(1514,1502,1508,1493), "notes?","tips?","rest","tempo","cue","cues","instructions?"].join("|");
+  /* Day header detection — matches "אימון A/B/1", "יום א/1", "Day 1/A", "Workout 1/A" */
+  var HE_IMUN = String.fromCharCode(1488,1497,1502,1493,1503);
+  var HE_YOM = String.fromCharCode(1497,1493,1501);
+  var HE_MENUCHA = String.fromCharCode(1502,1504,1493,1495,1492);
+  var dayHeaderRe = new RegExp("^(" + HE_IMUN + "|" + HE_YOM + "|day|workout)\\s+[A-Za-z0-9\u05D0-\u05EA]+", "i");
+  /* Junk line regex — lines captured as per-day notes */
+  var junkWords = [String.fromCharCode(1491,1490,1513,1497,1501), String.fromCharCode(1492,1506,1512,1493,1514), HE_MENUCHA, "notes?","tips?","rest","tempo","cue","cues","instructions?"].join("|");
   var JUNK_PREFIX = new RegExp("^(" + junkWords + ")\\s*:", "i");
+  /* Data label: סטים/חזרות: etc. */
   var S = String.fromCharCode(1505,1496,1497,1501);
   var R = String.fromCharCode(1495,1494,1512,1493,1514);
   var SH = String.fromCharCode(1513,1500);
   var HAS_DATA = new RegExp("\\d+\\s*[x\u00d7*]\\s*\\d+|\\d+\\s*(?:" + S + "|" + R + "|sets?|reps?)", "i");
   var HAS_NUMBER_PREFIX = /^\d+[\.\)\-:\s]/;
   var SUPERSET = new RegExp(String.fromCharCode(1505,1493,1508,1512) + "[\\s\\-]*" + String.fromCharCode(1505,1496) + "|superset", "i");
-  var REST_RE = new RegExp(String.fromCharCode(1502,1504,1493,1495,1492) + "|rest\\s*day", "i");
-  var DATA_LABEL = new RegExp("^(" + S + "/?" + R + "?|" + R + "/?" + S + "?|sets?/?reps?)\\s*:?\\s*", "i");
+  var REST_RE = new RegExp(HE_MENUCHA + "|rest\\s*day", "i");
+  var DATA_LABEL = new RegExp("^(" + S + "/?" + R + "?|" + R + "/?" + S + "?|sets?/?reps?|" + String.fromCharCode(1489,1497,1510,1493,1506) + ")\\s*:?\\s*", "i");
   var RANGE_PATTERN = new RegExp("(\\d+)(?:-(\\d+))?\\s*" + S + "\\s+" + SH + "\\s+(\\d+(?:-\\d+)?)\\s*" + R, "i");
   var SETS_RANGE = new RegExp("(\\d+)-(\\d+)\\s*(" + S + "|sets?)", "i");
   function normalizeData(str){
@@ -371,17 +377,34 @@ function parseWorkout(text){
     str = str.replace(/\.\s*$/, "");
     return str.trim();
   }
+  /* STEP 1: Segment by day header, not by blank lines */
+  var allLines = text.split("\n").map(function(l){return l.trim();}).filter(function(l){return l !== "";});
+  var blocks = [], current = null;
+  allLines.forEach(function(line){
+    if(dayHeaderRe.test(line)){
+      if(current) blocks.push(current);
+      current = {header:line, lines:[]};
+    } else {
+      if(!current) current = {header:null, lines:[]};
+      current.lines.push(line);
+    }
+  });
+  if(current) blocks.push(current);
+  /* If first block has no explicit header, give it a default */
+  if(blocks.length > 0 && blocks[0].header === null){
+    blocks[0].header = HE_YOM + " 1";
+  }
+  /* STEP 2: Parse each block into a workout day */
   blocks.forEach(function(block){
-    var rawLines = block.split("\n").map(function(l){return l.trim();}).filter(function(l){return l !== "";});
-    if(rawLines.length < 1) return;
-    var tabFull = rawLines[0];
+    var tabFull = block.header;
+    var lines = block.lines;
     var shortName = tabFull;
     var cutMatch = tabFull.match(/^([^:\-\u2013\u2014]+)[:\-\u2013\u2014]/);
     if(cutMatch && cutMatch[1].trim().length > 0 && cutMatch[1].trim().length <= 20){
       shortName = cutMatch[1].trim();
     }
-    /* v2.3.3: Search for workout header pattern anywhere in first line */
-    var headerPattern = new RegExp("(" + String.fromCharCode(1488,1497,1502,1493,1503) + "\\s+[\u0590-\u05ff0-9A-Za-z]+|" + String.fromCharCode(1497,1493,1501) + "\\s+[\u0590-\u05ff0-9]+|[Dd]ay\\s+[\\w\\u0590-\u05ff]+|[Ww]orkout\\s+[\\w\\u0590-\u05ff]+)", "u");
+    /* Look for header pattern anywhere in tabFull */
+    var headerPattern = new RegExp("(" + HE_IMUN + "\\s+[\u0590-\u05ff0-9A-Za-z]+|" + HE_YOM + "\\s+[\u0590-\u05ff0-9]+|[Dd]ay\\s+[\\w\u0590-\u05ff]+|[Ww]orkout\\s+[\\w\u0590-\u05ff]+)", "u");
     var headerMatch = tabFull.match(headerPattern);
     if(headerMatch && headerMatch[1].length <= 20){
       shortName = headerMatch[1].trim();
@@ -389,9 +412,9 @@ function parseWorkout(text){
     shortName = shortName.trim();
     var exercises = [], notes = [], descriptionLines = [], supersetMode = false;
     var merged = [];
-    for(var i = 1; i < rawLines.length; i++){
-      var cur = rawLines[i];
-      var nxt = rawLines[i+1] || "";
+    for(var i = 0; i < lines.length; i++){
+      var cur = lines[i];
+      var nxt = lines[i+1] || "";
       if(JUNK_PREFIX.test(cur)){ notes.push(cur); continue; }
       if(SUPERSET.test(cur)){ merged.push({type:"superset", text:cur}); continue; }
       var curHasData = HAS_DATA.test(cur);
@@ -419,6 +442,7 @@ function parseWorkout(text){
       workouts.push({fullName:tabFull, shortName:shortName, exercises:exercises, isRestDay:isRest, notes:notes, icon:lb.icon, desc:descriptionLines.join(" ")});
     }
   });
+  /* Post-process: merge phantom days */
   var final = [];
   workouts.forEach(function(d){
     if(d.exercises.length === 0 && !d.isRestDay && final.length > 0){
