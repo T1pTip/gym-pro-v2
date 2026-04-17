@@ -428,15 +428,12 @@ function parseWorkout(text){
     var tabFull = block.header, lines = block.lines;
     /* v2.5: smart shortName — יום X stays, אימון X becomes just X, else use index */
     var shortName = "";
-    var yomMatch = tabFull.match(new RegExp("(" + HE_YOM + "\\s+[\u0590-\u05ff0-9]+)", "u"));
-    var imunMatch = tabFull.match(new RegExp("(?:" + HE_IMUN + "|day|workout)\\s+([\\w\u0590-\u05ff]+)", "iu"));
-    if(yomMatch){
-      shortName = yomMatch[1].trim();
-    } else if(imunMatch){
-      shortName = imunMatch[1].trim();
-    } else {
-      shortName = String.fromCharCode(65 + blockIdx);
-    }
+    /* v2.5.2: match shortName only at START of tabFull */
+    var startYom = tabFull.match(new RegExp("^" + HE_YOM + "\\s+([\u0590-\u05ff0-9]+)", "u"));
+    var startImun = tabFull.match(new RegExp("^(?:" + HE_IMUN + "|day|workout)\\s+([\\w\u0590-\u05ff]+)", "iu"));
+    if(startYom){ shortName = HE_YOM + " " + startYom[1].trim(); }
+    else if(startImun){ shortName = startImun[1].trim(); }
+    else { shortName = String.fromCharCode(65 + blockIdx); }
     var exercises = [], notes = [], descriptionLines = [], supersetMode = false;
     var merged = [];
     for(var i = 0; i < lines.length; i++){
