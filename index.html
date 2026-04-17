@@ -361,7 +361,14 @@ function parseWorkout(text){
   var HE_KG = String.fromCharCode(1511,1490);
   var HE_KG_Q = String.fromCharCode(1511,34,1490);
   var HE_KILO = String.fromCharCode(1511,1497,1500,1493);
-  var dayHeaderRe = new RegExp("^[^A-Za-z\u05D0-\u05EA]*(" + HE_IMUN + "|" + HE_YOM + "|day|workout)\\s+[A-Za-z0-9\u05D0-\u05EA]+", "i");
+    var dayHeaderRe = new RegExp(
+    "^[^A-Za-z\\u05D0-\\u05EA]*" +
+    "(?:" + HE_IMUN + "|" + HE_YOM + "|day|workout)" +
+    "\\s+" +
+    "(?:[A-Za-z\\u05D0-\\u05EA]|\\d{1,2})" +
+    "(?:[\\s:\\-\\u2013\\u2014]|$)",
+    "i"
+  );
   var junkWords = [String.fromCharCode(1491,1490,1513,1497,1501), String.fromCharCode(1492,1506,1512,1493,1514), HE_MENUCHA, "notes?","tips?","rest","tempo","cue","cues","instructions?"].join("|");
   var JUNK_PREFIX = new RegExp("^(" + junkWords + ")\\s*:", "i");
   var S = String.fromCharCode(1505,1496,1497,1501);
