@@ -682,7 +682,7 @@ function updateUI(){
 function doLoad(){
   var raw=document.getElementById('planTxt').value.trim();if(!raw)return;
   var parsed=parseWorkout(cleanRawText(raw));if(!parsed.length){showNoExToast();return;}
-  plan=parsed;curDay=0;done={};saveDone();
+  plan=parsed;curDay=0;done={};saveDone();try{localStorage.removeItem(WDUR_KEY);}catch(e){}
   try{localStorage.setItem(STORAGE_KEY,JSON.stringify(plan));}catch(e){}
   document.getElementById('editPanel').style.display='none';
   updateUI();renderTabs();renderDay();
@@ -918,7 +918,7 @@ function deletePlan(e){
   if(e)e.stopPropagation();
   _deletedPlan=JSON.parse(JSON.stringify(plan));
   plan=[];curDay=0;done={};saveDone();
-  try{localStorage.removeItem(STORAGE_KEY);}catch(e2){}
+  try{localStorage.removeItem(STORAGE_KEY);localStorage.removeItem(WDUR_KEY);}catch(e2){}
   var dpb=document.getElementById('deletePlanBtn');if(dpb){dpb.dataset.confirm='';dpb.textContent=T.deleteBtn;}
   var m=document.getElementById('dropdownMenu');if(m)m.classList.remove('open');
   updateUI();renderTabs();renderDay();showUndoToast();
