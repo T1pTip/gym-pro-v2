@@ -358,6 +358,8 @@ function parseWorkout(text){
   var HE_IMUN = String.fromCharCode(1488,1497,1502,1493,1503);
   var HE_YOM = String.fromCharCode(1497,1493,1501);
   var HE_MENUCHA = String.fromCharCode(1502,1504,1493,1495,1492);
+  /* v2.6: Hebrew ordinal words for day detection (ראשון, שני, ...) */
+  var HE_ORDINALS = [String.fromCharCode(1512,1488,1513,1493,1503),String.fromCharCode(1513,1504,1497),String.fromCharCode(1513,1500,1497,1513,1497),String.fromCharCode(1512,1489,1497,1506,1497),String.fromCharCode(1495,1502,1497,1513,1497),String.fromCharCode(1513,1497,1513,1497),String.fromCharCode(1513,1489,1497,1506,1497),String.fromCharCode(1513,1502,1497,1504,1497),String.fromCharCode(1514,1513,1497,1506,1497),String.fromCharCode(1506,1513,1497,1512,1497)].join("|");
   var HE_KG = String.fromCharCode(1511,1490);
   var HE_KG_Q = String.fromCharCode(1511,34,1490);
   var HE_KILO = String.fromCharCode(1511,1497,1500,1493);
@@ -365,8 +367,8 @@ function parseWorkout(text){
     "^[^A-Za-z\\u05D0-\\u05EA]*" +
     "(?:" + HE_IMUN + "|" + HE_YOM + "|day|workout)" +
     "\\s+" +
-    "(?:[A-Za-z\\u05D0-\\u05EA]|\\d{1,2})" +
-    "(?:[\\s:\\-\\u2013\\u2014]|$)",
+    "(?:" + HE_ORDINALS + "|[A-Za-z\\u05D0-\\u05EA]['\\u05F3]?|\\d{1,2})" +
+    "(?:[\\s:\\-\\u2013\\u2014'\\u05F3]|$)",
     "i"
   );
   var junkWords = [String.fromCharCode(1491,1490,1513,1497,1501), String.fromCharCode(1492,1506,1512,1493,1514), HE_MENUCHA, "notes?","tips?","rest","tempo","cue","cues","instructions?"].join("|");
@@ -429,9 +431,12 @@ function parseWorkout(text){
     /* v2.5: smart shortName — יום X stays, אימון X becomes just X, else use index */
     var shortName = "";
     /* v2.5.2: match shortName only at START of tabFull */
+    /* v2.6: match "אימון X" anywhere in header (prefer it over "יום Y") */
+    var imunAnywhere = tabFull.match(new RegExp("(?:" + HE_IMUN + "|day|workout)\\s+([A-Za-z\u05D0-\u05EA]|\\d{1,2})(?=[\\s:\\-\\u2013\\u2014]|$)", "iu"));
     var startYom = tabFull.match(new RegExp("^" + HE_YOM + "\\s+([\u0590-\u05ff0-9]+)", "u"));
     var startImun = tabFull.match(new RegExp("^(?:" + HE_IMUN + "|day|workout)\\s+([\\w\u0590-\u05ff]+)", "iu"));
-    if(startYom){ shortName = HE_YOM + " " + startYom[1].trim(); }
+    if(imunAnywhere){ shortName = imunAnywhere[1].trim(); }
+    else if(startYom){ shortName = HE_YOM + " " + startYom[1].trim(); }
     else if(startImun){ shortName = startImun[1].trim(); }
     else { shortName = String.fromCharCode(65 + blockIdx); }
     var exercises = [], notes = [], descriptionLines = [], supersetMode = false;
@@ -441,6 +446,9 @@ function parseWorkout(text){
       if(JUNK_PREFIX.test(cur)){ notes.push(cur); continue; }
       if(SUPERSET.test(cur)){ merged.push({type:"superset", text:cur}); continue; }
       var curHasData = HAS_DATA.test(cur);
+      /* v2.6: pure descriptive prose (no data, ends with punctuation) → desc field */
+      var earlyDescCheck = (cur.length > 40 || /[.!?]$/.test(cur));
+      if(!curHasData && earlyDescCheck){ descriptionLines.push(cur); continue; }
       var nxtHasData = HAS_DATA.test(nxt);
       var nxtIsJunk = JUNK_PREFIX.test(nxt);
       var curLooksLikeName = cur.length > 2 && !HAS_NUMBER_PREFIX.test(cur);
