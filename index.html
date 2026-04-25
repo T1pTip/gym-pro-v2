@@ -1682,14 +1682,29 @@ if (document.readyState === 'loading') {
           var nextEx = null;
           try {
             var raw = localStorage.getItem('gym_plan_v3');
-            if (raw && typeof window.parseWorkout === 'function') {
-              var days = window.parseWorkout(raw);
-              var activeIdx = (typeof window.currentDayIdx === 'number') ? window.currentDayIdx : 0;
-              var day = days[activeIdx];
-              if (day && day.exercises) {
-                var idx = day.exercises.findIndex(function(e){ return e.name === exName; });
-                if (idx >= 0 && idx < day.exercises.length - 1) {
-                  nextEx = day.exercises[idx + 1].name;
+            if (raw) {
+              var days = null;
+              try {
+                var parsed = JSON.parse(raw);
+                if (Array.isArray(parsed)) days = parsed;
+              } catch(e) {}
+              if (!days && typeof window.parseWorkout === 'function') {
+                days = window.parseWorkout(raw);
+              }
+              if (days) {
+                // Find active day from active tab
+                var activeIdx = 0;
+                var activeTab = document.querySelector('.tab.active');
+                if (activeTab) {
+                  var allTabs = Array.from(document.querySelectorAll('[role="tab"]'));
+                  activeIdx = Math.max(0, allTabs.indexOf(activeTab));
+                }
+                var day = days[activeIdx];
+                if (day && day.exercises) {
+                  var idx = day.exercises.findIndex(function(e){ return e.name === exName; });
+                  if (idx >= 0 && idx < day.exercises.length - 1) {
+                    nextEx = day.exercises[idx + 1].name;
+                  }
                 }
               }
             }
