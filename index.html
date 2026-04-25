@@ -9,6 +9,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="GYM PRO">
 <meta name="theme-color" content="#0d0f1a">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data:; img-src 'self' data: blob: https:; connect-src 'self' https://script.google.com">
 <meta name="description" content="אפליקציית אימון חכמה">
 <link rel="apple-touch-icon" sizes="180x180" href="icon-180.png">
 <link rel="icon" type="image/png" sizes="32x32" href="icon-32.png">
@@ -193,9 +194,27 @@ body.ltr .dropdown-menu{left:auto;right:0}
 .pb-float-emoji-wrap{width:40px;height:40px;background:rgba(255,165,0,0.12);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .pb-float-emoji{font-size:22px;line-height:1}
 @media (max-width:420px){.pb-float{bottom:16px;left:16px;width:52px;height:52px}.pb-float-emoji-wrap{width:36px;height:36px}.pb-float-emoji{font-size:20px}}
+/* ═══ A11y suite (M1 touch targets + M3 focus-visible + N5 skip-link) ═══ */
+*:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+.edit-btn{min-height:44px;min-width:44px}
+.guide-btn,.menu-btn{width:44px;height:44px}
+.tab{min-height:44px;padding:11px 6px}
+.start-workout-btn{min-height:44px;padding:11px 18px}
+.weight-select{min-height:44px;padding-top:11px;padding-bottom:11px}
+.check-btn,.yt-btn,.hist-btn{min-height:44px;min-width:44px}
+.timer-add,.timer-skip{min-height:44px;padding:11px 14px}
+.lang-toggle,.lang-toggle button{height:44px;line-height:44px;min-width:44px}
+.lang-toggle-row button{min-height:44px;min-width:44px}
+.week-seg,.week-seg button{height:44px;min-height:44px}
+.hist-close{width:44px;height:44px}
+#installBanner button{min-height:44px;min-width:44px}
+.skip-link{position:absolute;top:-50px;inset-inline-start:8px;background:var(--accent);color:#000;padding:10px 16px;border-radius:0 0 8px 8px;font-weight:700;text-decoration:none;z-index:1001;transition:top .15s}
+.skip-link:focus{top:0}
 </style>
 </head>
 <body class="rtl">
+<noscript><div style="padding:40px 20px;text-align:center;color:#e2e8f0;background:#0d0f1a;font-family:Arial,sans-serif;line-height:1.6;min-height:100vh"><h1 style="color:#818cf8;font-size:32px;margin-bottom:16px">GYM PRO</h1><p style="font-size:16px">נדרש JavaScript להפעלת האפליקציה.<br>Please enable JavaScript to use this app.</p></div></noscript>
+<a href="#dayContent" class="skip-link">דלג לתוכן · Skip to content</a>
 <div id="app">
   <div class="header">
     <div class="hrow" style="justify-content:space-between">
@@ -216,7 +235,7 @@ body.ltr .dropdown-menu{left:auto;right:0}
       </div>
       </div>
     </div>
-    <div class="tabs" id="tabs"></div>
+    <div class="tabs" id="tabs" role="tablist"></div>
   </div>
   <div class="edit-panel" id="editPanel">
     <div class="edit-hint" id="hintBox"></div>
@@ -631,7 +650,7 @@ var plan=[],curDay=0,done={},weights={},weekModes={};
 try{done=JSON.parse(localStorage.getItem('gym_done3')||'{}');}catch(e){}
 try{weights=JSON.parse(localStorage.getItem('gym_weights')||'{}');}catch(e){}
 try{weekModes=JSON.parse(localStorage.getItem('gym_week_modes')||'{}');}catch(e){}
-(function(){try{var t=new Date().toDateString();if(localStorage.getItem('gym_reset3')!==t){done={};localStorage.setItem('gym_reset3',t);}}catch(e){}})();
+(function(){try{var t=new Date().toISOString().slice(0,10);if(localStorage.getItem('gym_reset3')!==t){done={};localStorage.setItem('gym_reset3',t);}}catch(e){}})();
 function saveDone(){try{localStorage.setItem('gym_done3',JSON.stringify(done));}catch(e){}}
 function saveW(){try{localStorage.setItem('gym_weights',JSON.stringify(weights));}catch(e){}}
 function saveWeekModes(){try{localStorage.setItem('gym_week_modes',JSON.stringify(weekModes));}catch(e){}}
@@ -763,7 +782,7 @@ function updateUI(){
 function doLoad(){
   var raw=document.getElementById('planTxt').value.trim();if(!raw)return;
   var parsed=parseWorkout(cleanRawText(raw));if(!parsed.length){showNoExToast();return;}
-  plan=parsed;curDay=0;done={};saveDone();try{localStorage.removeItem(WDUR_KEY);}catch(e){}
+  plan=parsed;curDay=0;done={};saveDone();try{localStorage.removeItem(WDUR_KEY);localStorage.removeItem('gym_plan_draft');}catch(e){}
   try{localStorage.setItem(STORAGE_KEY,JSON.stringify(plan));}catch(e){}
   document.getElementById('editPanel').style.display='none';
   updateUI();renderTabs();renderDay();
@@ -862,7 +881,7 @@ function renderTabs(){
     var icons='';/* v2.5: icons removed from tabs */
     var iconsHtml=(meta.isDay||/\p{Emoji}/u.test(meta.label))?'':
       (icons?'<span style="display:block;font-size:12px;line-height:1.4;margin-top:1px">'+icons+'</span>':'');
-    html+='<div class="tab'+(i===curDay?' active':'')+'" onclick="switchDay('+i+')" title="'+esc(d.fullName)+'"><span class="tab-label">'+esc(meta.label)+'</span>'+iconsHtml+prog+'</div>';
+    html+='<div role="tab" tabindex="'+(i===curDay?'0':'-1')+'" aria-selected="'+(i===curDay?'true':'false')+'" class="tab'+(i===curDay?' active':'')+'" onclick="switchDay('+i+')" onkeydown="onTabKey(event,'+i+')" title="'+esc(d.fullName)+'"><span class="tab-label">'+esc(meta.label)+'</span>'+iconsHtml+prog+'</div>';
   }
   el.innerHTML=html;
 }
@@ -938,6 +957,22 @@ function renderDay(){
   content.innerHTML=html;
 }
 
+function onTabKey(e,i){
+  if(e.key==='Enter'||e.key===' '){e.preventDefault();switchDay(i);return;}
+  if(e.key==='ArrowRight'||e.key==='ArrowLeft'){
+    e.preventDefault();
+    var dir=e.key==='ArrowRight'?1:-1;
+    if(document.documentElement.dir==='rtl')dir=-dir;
+    var n=plan.length;if(!n)return;
+    var ni=(curDay+dir+n)%n;
+    switchDay(ni);
+    setTimeout(function(){var t=document.querySelectorAll('.tab')[ni];if(t)t.focus();},20);
+  } else if(e.key==='Home'){
+    e.preventDefault();if(plan.length){switchDay(0);setTimeout(function(){var t=document.querySelector('.tab');if(t)t.focus();},20);}
+  } else if(e.key==='End'){
+    e.preventDefault();if(plan.length){var li=plan.length-1;switchDay(li);setTimeout(function(){var t=document.querySelectorAll('.tab')[li];if(t)t.focus();},20);}
+  }
+}
 function switchDay(i){curDay=i;renderTabs();renderDay();}
 function toggleDone(j,enc){
   var k=curDay+'_'+j;done[k]=!done[k];saveDone();renderTabs();renderDay();
@@ -1002,7 +1037,21 @@ function showNoExToast(){
   document.body.appendChild(t);
   setTimeout(function(){t.remove();},3000);
 }
-function openEditPanel(){var p=document.getElementById('editPanel');p.style.display='block';var ta=document.getElementById('planTxt');ta.value=planToText()||'';ta.focus();}
+function openEditPanel(){
+  var p=document.getElementById('editPanel');p.style.display='block';
+  var ta=document.getElementById('planTxt');
+  if(plan.length){ta.value=planToText()||'';}
+  else{try{ta.value=localStorage.getItem('gym_plan_draft')||'';}catch(_){ta.value='';}}
+  ta.focus();
+  if(!ta.dataset.draftBound){
+    ta.dataset.draftBound='1';
+    var _dt=null;
+    ta.addEventListener('input',function(){
+      clearTimeout(_dt);
+      _dt=setTimeout(function(){try{localStorage.setItem('gym_plan_draft',ta.value);}catch(_){}},500);
+    });
+  }
+}
 document.getElementById('editBtn').onclick=function(){var p=document.getElementById('editPanel');if(p.style.display==='block'){p.style.display='none';return;}openEditPanel();};
 
 function toggleMenu(){
@@ -1045,6 +1094,17 @@ var stored='';try{stored=localStorage.getItem(STORAGE_KEY)||'';}catch(e){}
 if(stored){try{var p3=JSON.parse(stored);if(p3&&p3.length&&p3[0].exercises&&p3[0].exercises.length){plan=p3.map(function(d,i){var lb=makeLabels(d.fullName||'',i);return{fullName:lb.full,sh:lb.sh,tabDescription:d.tabDescription||'',exercises:d.exercises||[]};});}}catch(e){}}
 setLang(curLang);renderStreak();
 
+// Multi-tab sync via storage event (N2)
+window.addEventListener('storage',function(e){
+  if(!e.key)return;
+  try{
+    if(e.key==='gym_done3'){done=JSON.parse(e.newValue||'{}');renderTabs();renderDay();}
+    else if(e.key==='gym_weights'){weights=JSON.parse(e.newValue||'{}');renderDay();}
+    else if(e.key==='gym_plan_v3'&&e.newValue){var p=JSON.parse(e.newValue);if(p&&p.length){plan=p;curDay=0;updateUI();renderTabs();renderDay();}}
+    else if(e.key==='gym_lang'&&e.newValue&&e.newValue!==curLang){setLang(e.newValue);}
+  }catch(_){}
+});
+
 /* PWA: real sw.js (no Blob URLs) — manifest.json is referenced by <link> in <head> */
 if('serviceWorker' in navigator){
   window.addEventListener('load',function(){
@@ -1076,13 +1136,17 @@ var deferredPrompt=null;
 window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();deferredPrompt=e;showInstallBanner();});
 function showInstallBanner(){
   if(document.getElementById('installBanner'))return;
+  try{var dis=parseInt(localStorage.getItem('gym_install_dismissed')||'0');if(dis&&Date.now()-dis<7*86400000)return;}catch(e){}
   var b=document.createElement('div');b.id='installBanner';
   b.style.cssText='position:fixed;bottom:0;left:0;right:0;background:#111422;border-top:1px solid rgba(129,140,248,0.2);padding:14px 16px;display:flex;align-items:center;gap:12px;z-index:999;';
   b.innerHTML='<div style="flex:1"><div style="font-weight:700;color:#e2e8f0;font-size:14px">'+T.installTitle+'</div><div style="font-size:12px;color:#64748b;margin-top:2px">'+T.installSub+'</div></div><button onclick="doInstall()" style="background:#818cf8;color:#fff;border:none;padding:10px 18px;border-radius:10px;font-weight:700;font-size:14px;cursor:pointer;font-family:Heebo,Arial,sans-serif">'+T.installBtn+'</button><button onclick="dismissBanner()" style="background:transparent;border:none;color:#64748b;font-size:20px;cursor:pointer;padding:4px 8px">✕</button>';
   document.body.appendChild(b);
 }
 function doInstall(){if(!deferredPrompt)return;deferredPrompt.prompt();deferredPrompt.userChoice.then(function(){deferredPrompt=null;dismissBanner();});}
-function dismissBanner(){var b=document.getElementById('installBanner');if(b)b.remove();}
+function dismissBanner(){
+  try{localStorage.setItem('gym_install_dismissed',Date.now());}catch(e){}
+  var b=document.getElementById('installBanner');if(b)b.remove();
+}
 
 /* ═══════ NEW FEATURES (v2.1) ═══════ */
 
