@@ -450,12 +450,12 @@ function guesscat(n){for(var i=0;i<MMAP.length;i++)if(MMAP[i][0].test(n))return 
     var out = [];
     var dayCount = 0;
     var patterns = [
-      { re: /^[\s]*יום\s+([א-יA-Z\d]+|ראשון|שני|שלישי|רביעי|חמישי|שישי|שבת)\b\s*(?:[:\-\u2014]\s*|\(\s*)?(.*?)\s*$/, type:'explicit' },
-      { re: /^[\s]*אימון\s+([א-יA-Z\d]+)\b\s*(?:[:\-\u2014]\s*|\(\s*)?(.*?)\s*$/, type:'explicit' },
+      { re: /^[\s]*יום\s+([א-יA-Z\d]+|ראשון|שני|שלישי|רביעי|חמישי|שישי|שבת)(?=\s|$|[:\-\u2014()])\s*(?:[:\-\u2014]\s*|\(\s*)?(.*?)\s*$/, type:'explicit' },
+      { re: /^[\s]*אימון\s+([א-יA-Z\d]+)(?=\s|$|[:\-\u2014()])\s*(?:[:\-\u2014]\s*|\(\s*)?(.*?)\s*$/, type:'explicit' },
       { re: /^[\s]*Day\s+([A-Za-z\d]+)\b\s*(?:[:\-\u2014]\s*|\(\s*)?(.*?)\s*$/i, type:'explicit' },
       { re: /^[\s]*(?:Workout|Session|Routine|Training)\s+([A-Z\d]+)\b\s*(?:[:\-\u2014]\s*|\(\s*)?(.*?)\s*$/i, type:'explicit' },
       { re: /^[\s]*(sunday|monday|tuesday|wednesday|thursday|friday|saturday|sun|mon|tue|tues|wed|thu|thur|thurs|fri|sat)\b\s*(?:[:\-\u2014]\s*)?(.*?)\s*$/i, type:'dow' },
-      { re: /^[\s]*(ראשון|שני|שלישי|רביעי|חמישי|שישי|שבת)\b\s*(?:[:\-\u2014]\s*)?(.*?)\s*$/, type:'dow' }
+      { re: /^[\s]*(ראשון|שני|שלישי|רביעי|חמישי|שישי|שבת)(?=\s|$|[:\-\u2014()])\s*(?:[:\-\u2014]\s*)?(.*?)\s*$/, type:'dow' }
     ];
     function balanceParens(s) {
       if (!s) return s;
