@@ -351,286 +351,386 @@ function guesscat(n){for(var i=0;i<MMAP.length;i++)if(MMAP[i][0].test(n))return 
  * cleanRawText — light cleanup only, no aggressive filtering
  * Preserves original structure; just trims lines and removes table artifacts
  */
-function cleanRawText(text){
-  if(!text)return'';
-  // Preserve blank lines — they are block separators for parseWorkout
-  // Only strip known template artifacts
-  return text.split('\n')
-    .map(function(l){return l.trim();})
-    .filter(function(l){
-      if(/^[_\-=]{4,}$/.test(l))return false;
-      if(/פרמטר\s*\|/.test(l))return false;
-      if(/עצימות\s*\(RIR\)/.test(l))return false;
-      return true; // keep empty lines as block separators
-    })
-    .join('\n');
-}
 
-/**
- * parseWorkout — split into tab blocks, then parse each block
- */
-function parseWorkout(text){
-  /* v2.5: Weight + Tempo/RPE extraction + smart tab naming */
-  text = text.replace(/^\[\d{1,2}:\d{2},\s*\d{1,2}\/\d{1,2}\/\d{2,4}\]\s*[^:\n]+:\s*/gm, "");
-  /* v2.5.1: strip lone surrogates (broken emojis) */
-  text = text.replace(/[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:[^\uD800-\uDBFF]|^)[\uDC00-\uDFFF]/g, "");
-  var workouts = [], fi = 0;
-  var HE_IMUN = String.fromCharCode(1488,1497,1502,1493,1503);
-  var HE_YOM = String.fromCharCode(1497,1493,1501);
-  var HE_MENUCHA = String.fromCharCode(1502,1504,1493,1495,1492);
-  /* v2.6: Hebrew ordinal words for day detection (ראשון, שני, ...) */
-  var HE_ORDINALS = [String.fromCharCode(1512,1488,1513,1493,1503),String.fromCharCode(1513,1504,1497),String.fromCharCode(1513,1500,1497,1513,1497),String.fromCharCode(1512,1489,1497,1506,1497),String.fromCharCode(1495,1502,1497,1513,1497),String.fromCharCode(1513,1497,1513,1497),String.fromCharCode(1513,1489,1497,1506,1497),String.fromCharCode(1513,1502,1497,1504,1497),String.fromCharCode(1514,1513,1497,1506,1497),String.fromCharCode(1506,1513,1497,1512,1497)].join("|");
-  var HE_KG = String.fromCharCode(1511,1490);
-  var HE_KG_Q = String.fromCharCode(1511,34,1490);
-  var HE_KILO = String.fromCharCode(1511,1497,1500,1493);
-    var dayHeaderRe = new RegExp(
-    "^[^A-Za-z\\u05D0-\\u05EA]*" +
-    "(?:" + HE_IMUN + "|" + HE_YOM + "|day|workout)" +
-    "\\s+" +
-    "(?:" + HE_ORDINALS + "|[A-Za-z\\u05D0-\\u05EA]['\\u05F3]?|\\d{1,2})" +
-    "(?:[\\s:\\-\\u2013\\u2014'\\u05F3]|$)",
-    "i"
-  );
-  var junkWords = [String.fromCharCode(1491,1490,1513,1497,1501), String.fromCharCode(1492,1506,1512,1493,1514), HE_MENUCHA, "notes?","tips?","rest","tempo","cue","cues","instructions?"].join("|");
-  var JUNK_PREFIX = new RegExp("^(" + junkWords + ")\\s*:", "i");
-  var S = String.fromCharCode(1505,1496,1497,1501);
-  var R = String.fromCharCode(1495,1494,1512,1493,1514);
-  var SH = String.fromCharCode(1513,1500);
-  var HAS_DATA = new RegExp("\\d+\\s*[x\u00d7*]\\s*\\d+|\\d+\\s*(?:" + S + "|" + R + "|sets?|reps?)", "i");
-  var HAS_NUMBER_PREFIX = /^\d+[\.\)\-:\s]/;
-  var SUPERSET = new RegExp(String.fromCharCode(1505,1493,1508,1512) + "[\\s\\-]*" + String.fromCharCode(1505,1496) + "|superset", "i");
-  var REST_RE = new RegExp(HE_MENUCHA + "|rest\\s*day", "i");
-  var DATA_LABEL = new RegExp("^(" + S + "/?" + R + "?|" + R + "/?" + S + "?|sets?/?reps?|" + String.fromCharCode(1489,1497,1510,1493,1506) + ")\\s*:?\\s*", "i");
-  var RANGE_PATTERN = new RegExp("(\\d+)(?:-(\\d+))?\\s*" + S + "\\s+" + SH + "\\s+(\\d+(?:-\\d+)?)\\s*" + R, "i");
-  var SETS_RANGE = new RegExp("(\\d+)-(\\d+)\\s*(" + S + "|sets?)", "i");
-  /* v2.5: weight / tempo / RPE / intensity regex */
-  var WEIGHT_RE = new RegExp("(\\d+(?:\\.\\d+)?)\\s*(kg|lbs?|" + HE_KG_Q + "|" + HE_KG + "|" + HE_KILO + ")", "i");
-  var RPE_RE = /\brpe\s*(\d+(?:\.\d+)?)/i;
-  var INTENSITY_RE = /@\s*(\d+)\s*%/;
-  var TEMPO_RE = /\b(\d)[-:](\d)[-:](\d)(?:[-:](\d))?\b/;
-  function normalizeData(str){
-    str = str.replace(RANGE_PATTERN, function(m, a, b, reps){ var sets = b || a; return sets + " " + S + ", " + reps + " " + R; });
-    str = str.replace(SETS_RANGE, function(m, a, b, w){ return b + " " + w; });
-    str = str.replace(/\.\s*$/, "");
-    return str.trim();
+/* PARSER v3 — Universal AI Workout Plan Parser (v3.0.0) — drop-in replacement */
+
+(function() {
+  'use strict';
+
+  var DOW_KEYS_HE = ['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת'];
+  var WORD_NUM = {'one':'1','two':'2','three':'3','four':'4','five':'5','six':'6','seven':'7','eight':'8','first':'1','second':'2','third':'3','fourth':'4','fifth':'5'};
+  var SECTION_RE = /^\s*\*?\s*(warm[\s\-]?up|cool[\s\-]?down|stretch(ing)?|main(\s+work|\s+set|\s+lifts?)?|accessory|finisher|חימום|שחרור|עיקרי)\s*[:\-\u2014()]*\s*(\([^)]+\))?\s*$/i;
+  var NOTES_RE = /^\s*\*?\s*(notes?|tips?|cues?|הערות|טיפים)\s*:/i;
+
+  function sanitize(text) {
+    if (!text || typeof text !== 'string') return '';
+    return text
+      .replace(/\r\n?/g, '\n')
+      .replace(/[\u201C\u201D\u201E\u201F]/g, '"')
+      .replace(/[\u2018\u2019\u201A\u201B]/g, "'")
+      .replace(/[\u2013\u2014\u2015]/g, '\u2014')
+      .replace(/[\u00D7\u2715\u2716]/g, 'x')
+      .replace(/[\uFF10-\uFF19]/g, function(c){ return String.fromCharCode(c.charCodeAt(0)-0xFEE0); })
+      .replace(/[\u00A0\u202F\u2007]/g, ' ')
+      .replace(/[\u200B-\u200F\uFEFF]/g, '')
+      .replace(/^[\s]*[\u2022\u25CF\u25CB\u25E6\u25AA\u25AB\u25A0\u25A1\u2605\u2606\u27A4\u27A1\u2192\u2713\u2714]\s*/gm, '* ')
+      .replace(/\t/g, '  ')
+      .replace(/[ ]+$/gm, '')
+      .replace(/\n{3,}/g, '\n\n')
+      .trim();
   }
-  /* Extract hints: weight/tempo/RPE/intensity from exercise text. Returns {clean, weight, tempo, rpe, intensity} */
-  function extractHints(text){
-    var weight = null, tempo = null, rpe = null, intensity = null;
-    var w = text.match(WEIGHT_RE);
-    if(w){ weight = w[1] + "kg"; text = text.replace(w[0], "").trim(); }
-    var r2 = text.match(RPE_RE);
-    if(r2){ rpe = "RPE " + r2[1]; text = text.replace(r2[0], "").trim(); }
-    var i2 = text.match(INTENSITY_RE);
-    if(i2){ intensity = i2[1] + "%"; text = text.replace(i2[0], "").trim(); }
-    /* Tempo: only detect if text has "tempo" keyword nearby, to avoid false positives like "3-4" */
-    if(/tempo/i.test(text)){
-      var t2 = text.match(TEMPO_RE);
-      if(t2){ tempo = t2[0]; text = text.replace(/\btempo\s*:?\s*/i, "").replace(t2[0], "").trim(); }
-    }
-    text = text.replace(/\s{2,}/g, " ").replace(/[,;:\s]+$/, "").trim();
-    return {clean:text, weight:weight, tempo:tempo, rpe:rpe, intensity:intensity};
+
+  function stripMarkdown(text) {
+    return text
+      .replace(/<script[\s\S]*?<\/script>/gi, '')
+      .replace(/<style[\s\S]*?<\/style>/gi, '')
+      .replace(/<\/?(?:b|strong|i|em|u|br|p|span|div|h[1-6]|script|style|iframe|object|embed)\s*[^>]*>/gi, '')
+      .replace(/```[a-z]*\n?/gi, '')
+      .replace(/```/g, '')
+      .replace(/`([^`]+)`/g, '$1')
+      .replace(/\*\*([^*]+)\*\*/g, '$1')
+      .replace(/__([^_]+)__/g, '$1')
+      .replace(/(?:^|[^*])\*([^*\n]+)\*(?!\*)/g, function(m,c){ return m.charAt(0)==='*'?c:m.charAt(0)+c; })
+      .replace(/~~([^~]+)~~/g, '$1')
+      .replace(/^#{1,6}\s+/gm, '')
+      .replace(/^>\s*/gm, '')
+      .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+      .replace(/!\[[^\]]*\]\([^)]+\)/g, '')
+      .replace(/\[([^\]]+)\]\[[^\]]+\]/g, '$1')
+      .replace(/^[\s]*[-*_]{3,}[\s]*$/gm, '')
+      .replace(/^[\s]*[-+]\s+/gm, '* ')
+      .replace(/^[\s]*\*\s*\[[\sx]\]\s+/gim, '* ');
   }
-  /* STEP 1: Segment by day header */
-  var allLines = text.split("\n").map(function(l){return l.trim();}).filter(function(l){return l !== "";});
-  var blocks = [], current = null;
-  allLines.forEach(function(line){
-    if(dayHeaderRe.test(line)){
-      if(current) blocks.push(current);
-      current = {header:line.replace(/^[^A-Za-z\u05D0-\u05EA]+/, "").trim(), lines:[]};
-    } else {
-      if(!current) current = {header:null, lines:[]};
-      current.lines.push(line);
+
+  function flattenTables(text) {
+    var lines = text.split('\n');
+    var out = [];
+    var headers = null;
+    var inTable = false;
+    var tableRowRe = /^\s*\|.+\|\s*$/;
+    var tableSepRe = /^\s*\|[\s:|\-=]+\|\s*$/;
+    for (var i = 0; i < lines.length; i++) {
+      var line = lines[i];
+      if (tableSepRe.test(line)) continue;
+      if (tableRowRe.test(line)) {
+        var cells = line.split('|').slice(1, -1).map(function(c){ return c.trim(); });
+        if (!headers) { headers = cells.map(function(c){ return c.toLowerCase(); }); inTable = true; continue; }
+        var find = function(re) { for (var j=0; j<headers.length; j++) if (re.test(headers[j])) return cells[j]; return null; };
+        var name = find(/(name|exercise|move|תרגיל)/i) || cells[0];
+        var sets = find(/(sets?|סטים)/i);
+        var reps = find(/(reps?|חזרות)/i);
+        var weight = find(/(weight|kg|lbs?|load|משקל)/i);
+        var rpe = find(/(rpe|intensity)/i);
+        var notes = find(/(notes?|comment|הערות)/i);
+        if (!name) continue;
+        var canonical = '* ' + name;
+        if (sets && reps) canonical += ': ' + sets + ' sets, ' + reps + ' reps';
+        else if (sets) canonical += ': ' + sets + ' sets';
+        else if (reps) canonical += ': ' + reps + ' reps';
+        else canonical += ': 3 sets, 10 reps';
+        if (weight && !/^(bodyweight|bw|-|\s*$)/i.test(weight)) canonical += ', ' + weight;
+        if (rpe && /\d/.test(rpe)) canonical += ', RPE ' + rpe.replace(/[^\d.]/g, '');
+        if (notes && notes.length > 0 && notes !== '-') canonical += ' (' + notes + ')';
+        out.push(canonical);
+      } else {
+        if (inTable) { headers = null; inTable = false; }
+        out.push(line);
+      }
     }
-  });
-  if(current) blocks.push(current);
-  if(blocks.length > 0 && blocks[0].header === null){ blocks[0].header = HE_YOM + " 1"; }
-  /* STEP 2: Parse each block */
-  blocks.forEach(function(block, blockIdx){
-    var tabFull = block.header, lines = block.lines;
-    /* v2.5: smart shortName — יום X stays, אימון X becomes just X, else use index */
-    var shortName = "";
-    /* v2.5.2: match shortName only at START of tabFull */
-    /* v2.6: match "אימון X" anywhere in header (prefer it over "יום Y") */
-    var imunAnywhere = tabFull.match(new RegExp("(?:" + HE_IMUN + "|day|workout)\\s+([A-Za-z\u05D0-\u05EA]|\\d{1,2})(?=[\\s:\\-\\u2013\\u2014]|$)", "iu"));
-    var startYom = tabFull.match(new RegExp("^" + HE_YOM + "\\s+([\u0590-\u05ff0-9]+)", "u"));
-    var startImun = tabFull.match(new RegExp("^(?:" + HE_IMUN + "|day|workout)\\s+([\\w\u0590-\u05ff]+)", "iu"));
-    if(imunAnywhere){ shortName = imunAnywhere[1].trim(); }
-    else if(startYom){ shortName = HE_YOM + " " + startYom[1].trim(); }
-    else if(startImun){ shortName = startImun[1].trim(); }
-    else { shortName = String.fromCharCode(65 + blockIdx); }
-    var exercises = [], notes = [], descriptionLines = [], supersetMode = false;
-    var merged = [];
-    for(var i = 0; i < lines.length; i++){
-      var cur = lines[i], nxt = lines[i+1] || "";
-      if(JUNK_PREFIX.test(cur)){ notes.push(cur); continue; }
-      if(SUPERSET.test(cur)){ merged.push({type:"superset", text:cur}); continue; }
-      var curHasData = HAS_DATA.test(cur);
-      /* v2.6: pure descriptive prose (no data, ends with punctuation) → desc field */
-      var earlyDescCheck = (cur.length > 40 || /[.!?]$/.test(cur));
-      if(!curHasData && earlyDescCheck){ descriptionLines.push(cur); continue; }
-      var nxtHasData = HAS_DATA.test(nxt);
-      var nxtIsJunk = JUNK_PREFIX.test(nxt);
-      var curLooksLikeName = cur.length > 2 && !HAS_NUMBER_PREFIX.test(cur);
-      var nxtIsNumbered = HAS_NUMBER_PREFIX.test(nxt);
-      var curIsLongDescr = cur.length > 80 || /[.!?]$/.test(cur);
-      if(!curHasData && curLooksLikeName && !curIsLongDescr && nxtHasData && !nxtIsJunk && !nxtIsNumbered && nxt){
-        var cleanData = nxt.replace(DATA_LABEL, "").trim();
-        cleanData = normalizeData(cleanData);
-        merged.push({type:"ex", name:cur.trim(), data:cleanData});
-      i++; } else { merged.push({type:"ex", name:null, data:normalizeData(cur)}); }
-    }
-    merged.forEach(function(item){
-      if(item.type === "superset"){ supersetMode = true; return; }
-      /* v2.5: extract weight/tempo/RPE/intensity from BOTH name and data */
-      var nameHints = item.name ? extractHints(item.name) : {clean:null};
-      var dataHints = extractHints(item.data);
-      var cleanText = nameHints.clean ? (nameHints.clean + ": " + dataHints.clean) : dataHints.clean;
-      var card = createExerciseCard(cleanText, supersetMode);
-      if(card){
-        card.suggestedWeight = nameHints.weight || dataHints.weight || null;
-        card.tempo = nameHints.tempo || dataHints.tempo || null;
-        card.rpe = nameHints.rpe || dataHints.rpe || null;
-        card.intensity = nameHints.intensity || dataHints.intensity || null;
-        exercises.push(card);
-      } else if(exercises.length === 0){ descriptionLines.push(cleanText); }
+    return out.join('\n');
+  }
+
+  function normalizeDayHeaders(text) {
+    var weekCount = 0;
+    text = text.replace(/^[\s]*(?:Week|שבוע|Phase|פאזה)\s+(\d+(?:\s*-\s*\d+)?)\s*(?:\(([^)]+)\))?\s*:?\s*$/gim, function(_, n, d) {
+      weekCount++;
+      return 'Day ' + weekCount + (d ? ' \u2014 ' + d : '');
     });
-    var isRest = REST_RE.test(tabFull + " " + descriptionLines.join(" ")) && exercises.length === 0;
-    if(exercises.length > 0 || isRest){
-      var lb = makeLabels(tabFull, fi++);
-      workouts.push({fullName:tabFull, shortName:shortName, exercises:exercises, isRestDay:isRest, notes:notes, icon:lb.icon, desc:descriptionLines.join(" ")});
+    var lines = text.split('\n');
+    var out = [];
+    var dayCount = 0;
+    var patterns = [
+      { re: /^[\s]*יום\s+([א-יA-Z\d]+|ראשון|שני|שלישי|רביעי|חמישי|שישי|שבת)\b\s*(?:[:\-\u2014]\s*|\(\s*)?(.*?)\s*$/, type:'explicit' },
+      { re: /^[\s]*אימון\s+([א-יA-Z\d]+)\b\s*(?:[:\-\u2014]\s*|\(\s*)?(.*?)\s*$/, type:'explicit' },
+      { re: /^[\s]*Day\s+([A-Za-z\d]+)\b\s*(?:[:\-\u2014]\s*|\(\s*)?(.*?)\s*$/i, type:'explicit' },
+      { re: /^[\s]*(?:Workout|Session|Routine|Training)\s+([A-Z\d]+)\b\s*(?:[:\-\u2014]\s*|\(\s*)?(.*?)\s*$/i, type:'explicit' },
+      { re: /^[\s]*(sunday|monday|tuesday|wednesday|thursday|friday|saturday|sun|mon|tue|tues|wed|thu|thur|thurs|fri|sat)\b\s*(?:[:\-\u2014]\s*)?(.*?)\s*$/i, type:'dow' },
+      { re: /^[\s]*(ראשון|שני|שלישי|רביעי|חמישי|שישי|שבת)\b\s*(?:[:\-\u2014]\s*)?(.*?)\s*$/, type:'dow' }
+    ];
+    function balanceParens(s) {
+      if (!s) return s;
+      var open = (s.match(/\(/g)||[]).length, close = (s.match(/\)/g)||[]).length;
+      while (close > open && /\)\s*$/.test(s)) { s = s.replace(/\s*\)\s*$/, ''); close--; }
+      while (open > close) { s += ')'; close++; }
+      return s;
     }
-  });
-  var final = [];
-  workouts.forEach(function(d){
-    if(d.exercises.length === 0 && !d.isRestDay && final.length > 0){
-      final[final.length-1].notes = (final[final.length-1].notes||[]).concat(d.notes||[]);
-      if(d.desc) final[final.length-1].desc += " " + d.desc;
-    } else { final.push(d); }
-  });
-  return final;
-}
-
-/**
- * createExerciseCard — the upgraded core
- *
- * Supported input patterns:
- *   1.  * Name: X סטים, Y חזרות          (original Hebrew)
- *   2.  * Name: X sets, Y reps            (original English)
- *   3.  * Name — X×Y  /  Name - XxY      (dash + multiplier)
- *   4.  * Name X×Y  /  Name 4x10         (space + multiplier at end)
- *   5.  * Name (X×Y)  /  Name (X sets)   (parentheses)
- *   6.  * Name | X סטים Y חזרות           (pipe separator)
- *   7.  Name X סטים של Y חזרות            (Hebrew inline)
- *   8.  Name X sets of Y reps             (English inline)
- *   9.  Inline: contains "X סטים" anywhere / "X sets" anywhere
- *   10. Bullet/numbered line with name only → defaults 3×10
- *   11. Plain text line that contains a known exercise pattern
- */
-function createExerciseCard(line,isSuperset){
-  var orig=line.trim();
-  if(!orig||orig.length<2)return null;
-
-  // Strip leading bullet / number / emoji decoration
-  var clean=orig
-    .replace(/^[💪🦵✅▶►→•·◦●]\s*/,'')
-    .replace(/^[\*\-–—]\s*/,'')
-    .replace(/^\d+[\.\)\-:\s]+/,'')
-    .replace(/^[א-וא-ת][\.\)]\s*/,'')
-    .trim();
-
-  if(!clean||clean.length<2)return null;
-
-  var hasBullet=/^[💪🦵✅▶►→•·◦●\*\-–—]/.test(orig);
-  var hasNumber=/^\d+[\.\)\-:\s]/.test(orig)||/^[א-ו][\.\)]/.test(orig);
-
-  var name=clean,sets='3',reps='10',matched=false,m;
-
-  // ── WEEK VARIANTS (check first, extract before other patterns strip the text) ──
-  var mw1=clean.match(/(?:שבועות?\s*1[-–]3|weeks?\s*1[-–]3)[^\d]*(\d+)\s*(?:סטים|sets?)[^\d]*([\d–\-]+)\s*(?:חזרות|reps?)/i);
-  var mw4=clean.match(/(?:שבוע?\s*(?:4|8|4[\/,]\s*8)|weeks?\s*(?:4|8))[^\d]*(\d+)\s*(?:סטים|sets?)[^\d]*([\d–\-]+)\s*(?:חזרות|reps?)/i);
-
-  // ── PATTERN 1: "Name: X סטים, Y חזרות" ──
-  m=clean.match(/^(.+?):\s*(\d+)\s*(?:סטים|sets?)[,\s]+\s*([\d–\-]+)\s*(?:חזרות|reps?)/i);
-  if(!matched&&m){name=m[1].trim();sets=m[2];reps=m[3];matched=true;}
-
-  // ── PATTERN 2: "Name — X×Y" or "Name – X×Y" (dash then mult) ──
-  if(!matched){m=clean.match(/^(.+?)\s*[—–]\s*(\d+)\s*[xX×]\s*([\d\-–]+)\s*$/);if(m){name=m[1].trim();sets=m[2];reps=m[3];matched=true;}}
-
-  // ── PATTERN 3: "Name - X×Y" (hyphen then mult, end of string) ──
-  if(!matched){m=clean.match(/^(.+?)\s+-\s+(\d+)\s*[xX×]\s*([\d\-–]+)\s*$/);if(m){name=m[1].trim();sets=m[2];reps=m[3];matched=true;}}
-
-  // ── PATTERN 4: "Name (X×Y)" ──
-  if(!matched){m=clean.match(/^(.+?)\s*\((\d+)\s*[xX×]\s*([\d\-–]+)\)/);if(m){name=m[1].trim();sets=m[2];reps=m[3];matched=true;}}
-
-  // ── PATTERN 5: "Name | X סטים Y חזרות" or "Name | X×Y" ──
-  if(!matched){m=clean.match(/^(.+?)\s*\|\s*(\d+)\s*[xX×]\s*([\d\-–]+)/);if(m){name=m[1].trim();sets=m[2];reps=m[3];matched=true;}}
-  if(!matched){m=clean.match(/^(.+?)\s*\|\s*(\d+)\s*(?:סטים|sets?)[,\s]+([\d\-–]+)\s*(?:חזרות|reps?)/i);if(m){name=m[1].trim();sets=m[2];reps=m[3];matched=true;}}
-
-  // ── PATTERN 6: "Name X×Y" (space + mult at end, no other separator) ──
-  if(!matched){m=clean.match(/^(.+?)\s+(\d+)\s*[xX×]\s*([\d\-–]+)\s*$/);if(m){name=m[1].trim();sets=m[2];reps=m[3];matched=true;}}
-
-  // ── PATTERN 7: "Name X sets of Y" / "Name X סטים של Y חזרות" ──
-  if(!matched){m=clean.match(/^(.+?)\s+(\d+)\s*sets?\s+(?:of\s*)?([\d\-–]+)\s*reps?/i);if(m){name=m[1].trim();sets=m[2];reps=m[3];matched=true;}}
-  if(!matched){m=clean.match(/^(.+?)\s+(\d+)\s*סטים\s*(?:של\s*)?([\d–\-]+)\s*חזרות/);if(m){name=m[1].trim();sets=m[2];reps=m[3].replace('–','-');matched=true;}}
-
-  // ── PATTERN 8: loose — "sets" and "reps" keywords anywhere ──
-  if(!matched){
-    var ms=clean.match(/(\d+)\s*(?:סטים|sets?)/i);
-    var mr=clean.match(/([\d–\-]+)\s*(?:חזרות|reps?)/i);
-    if(ms||mr){
-      // Name = text before first numeric-sets/reps mention
-      var nameEnd=clean.search(/\d+\s*(?:סטים|sets?|חזרות|reps?)/i);
-      if(nameEnd>2){name=clean.substring(0,nameEnd).replace(/[\s:\-,|]+$/,'').trim();}
-      else{name=clean.replace(/\d+\s*(?:סטים|sets?|[xX×]|חזרות|reps?).*/i,'').replace(/[\s:\-,|]+$/,'').trim();}
-      if(ms)sets=ms[1];
-      if(mr)reps=mr[1].replace('–','-');
-      if(name.length>1)matched=true;
+    for (var i = 0; i < lines.length; i++) {
+      var line = lines[i];
+      var matched = false;
+      for (var p = 0; p < patterns.length; p++) {
+        var m = line.match(patterns[p].re);
+        if (!m) continue;
+        dayCount++;
+        var label = m[1];
+        var lower = label.toLowerCase();
+        if (patterns[p].type === 'dow') label = String(dayCount);
+        else { if (WORD_NUM[lower]) label = WORD_NUM[lower]; if (DOW_KEYS_HE.indexOf(label) >= 0) label = String(dayCount); }
+        var desc = (m[2] || '').trim();
+        desc = desc.replace(/\s*[:\-\u2014]\s*$/, '');
+        desc = balanceParens(desc);
+        var pm = desc.match(/^\(\s*(.+?)\s*\)$/);
+        if (pm) desc = pm[1];
+        var canonical = 'יום ' + label;
+        if (desc) canonical += ' \u2014 ' + desc;
+        out.push(canonical);
+        matched = true;
+        break;
+      }
+      if (!matched) out.push(line);
     }
+    return out.join('\n');
   }
 
-  // ── PATTERN 9: has bullet/number → exercise with default sets/reps ──
-  if(!matched&&(hasBullet||hasNumber)){name=clean;matched=true;}
-
-  // ── PATTERN 10: plain text that looks like a short exercise name ──
-  // Only if line is short, not a sentence, and not a description
-  if(!matched&&clean.length<=50&&!/[.!?]$/.test(clean)&&!/^[A-Z][a-z].*\s[a-z].*\s[a-z]/.test(clean)){
-    // Avoid grabbing obvious description sentences
-    var wordCount=clean.split(/\s+/).length;
-    if(wordCount<=5){name=clean;matched=true;}
+  function stripSectionHeaders(text) {
+    var lines = text.split('\n');
+    var out = [];
+    for (var i = 0; i < lines.length; i++) {
+      var line = lines[i];
+      var trimmed = line.trim().replace(/^\*\s*/, '');
+      if (SECTION_RE.test(trimmed)) {
+        if (!/\d+\s*[x\u00D7]\s*\d+|\d+\s*sets?|\d+\s*reps?/i.test(line)) continue;
+      }
+      if (NOTES_RE.test(trimmed)) continue;
+      out.push(line);
+    }
+    return out.join('\n');
   }
 
-  if(!matched)return null;
+  function consolidateMultiline(text) {
+    var lines = text.split('\n');
+    var out = [];
+    var i = 0;
+    while (i < lines.length) {
+      var line = lines[i];
+      var stripped = line.trim().replace(/^\*\s*/, '');
+      var next = (lines[i+1] || '').trim();
+      if (stripped.length > 2 && stripped.length < 60 &&
+          !/\d/.test(stripped) && !/[:.]/.test(stripped) &&
+          !/^יום\s/.test(stripped) &&
+          /^[\*\-]?\s*\d+\s*(?:sets?|x|\u00D7|reps?)/i.test(next)) {
+        var consolidated = stripped + ': ' + next.replace(/^[\*\-]\s*/, '');
+        var nn = (lines[i+2] || '').trim();
+        if (/^\d+\s*(?:kg|lbs?)$/i.test(nn)) { consolidated += ', ' + nn; i += 3; }
+        else i += 2;
+        out.push('* ' + consolidated);
+      } else { out.push(line); i++; }
+    }
+    return out.join('\n');
+  }
 
-  // ── Clean up name ──
-  name=name
-    .replace(/[;:,|]+$/,'')          // trailing punctuation
-    .replace(/\s*\(.*?\)\s*$/,'')    // trailing parenthetical
-    .replace(/\s*\([^)]*$/,'')       // unclosed trailing parenthesis e.g. "name ("
-    .replace(/\s*[—–\-]+\s*$/,'')    // trailing dash
-    .replace(/\s{2,}/g,' ')
-    .trim();
+  function extractAnnotations(line) {
+    var ann = {};
+    var w = line || '';
+    w = w.replace(/[\u00D7\u2715\u2716]/g, 'x');
+    var m;
+    if ((m = w.match(/@\s*(\d+(?:\.\d+)?)\s*%(?:\s*(?:of\s+)?1\s*RM)?/i))) {
+      ann.intensity = m[1] + '%'; w = w.replace(m[0], ' ');
+    }
+    if ((m = w.match(/@\s*(\d+(?:\.\d+)?)\s*(kg|lbs?)\b/i))) {
+      ann.weight = m[1] + (m[2].toLowerCase().charAt(0)==='l'?'lbs':'kg'); w = w.replace(m[0], ' ');
+    }
+    if ((m = w.match(/@?\s*RPE\s*(\d+(?:\.\d+)?)/i))) {
+      ann.rpe = 'RPE ' + m[1]; w = w.replace(m[0], ' ');
+    }
+    if ((m = w.match(/(?:tempo\s*[:=]?\s*)(\d-\d-\d(?:-\d)?|\d{4})|\b(\d-\d-\d(?:-\d)?)\s*tempo\b/i))) {
+      ann.tempo = m[1] || m[2]; w = w.replace(m[0], ' ');
+    }
+    if (/\b(AMRAP)\b/i.test(w) || 
+        /(?:^|[^A-Za-z])(?:to|until)\s+(?:failure|fail)(?:$|[^A-Za-z])/i.test(w) || 
+        /(?:^|[^\u05D0-\u05EA])(?:עד\s+)?כשל(?:$|[^\u05D0-\u05EA])/.test(w)) {
+      ann.special = 'AMRAP';
+    }
+    if ((m = w.match(/\b(bodyweight|body\s+weight|BW)\b/i)) || (m = w.match(/משקל\s+גוף/))) {
+      ann.bodyweight = true; w = w.replace(m[0], ' ');
+    }
+    if ((m = w.match(/\b(each\s+(?:side|leg|arm|hand)|per\s+(?:side|leg|arm))\b/i)) || 
+        (m = w.match(/(?:^|[^\u05D0-\u05EA])(?:כל|לכל)\s+צד(?:$|[^\u05D0-\u05EA])/))) {
+      ann.unilateral = true; w = w.replace(m[0], ' ');
+    }
+    if (/\b(superset|sup\s+set)\b/i.test(w) || /סופרסט/.test(w)) {
+      ann.superset = true; w = w.replace(/\b(superset|sup\s+set)\b/gi, ' ').replace(/סופרסט/g, ' ');
+    }
+    if (/\b(drop\s*set|dropset)\b/i.test(w) || /דרופסט/.test(w)) {
+      ann.dropset = true; w = w.replace(/\b(drop\s*set|dropset)\b/gi, ' ').replace(/דרופסט/g, ' ');
+    }
+    if (!ann.weight && (m = w.match(/(?:^|[\s,])(\d+(?:\.\d+)?)\s*(kg|lbs?)\b/i))) {
+      ann.weight = m[1] + (m[2].toLowerCase().charAt(0)==='l'?'lbs':'kg');
+      w = w.replace(m[0], ' ');
+    }
+    w = w.replace(/\s{2,}/g, ' ').replace(/[\s,;]+$/, '').replace(/^[\s,;]+/, '').trim();
+    return { line: w, ann: ann };
+  }
 
-  if(!name||name.length<2)return null;
+  function parseExerciseLine(line) {
+    if (!line) return null;
+    line = line.replace(/[\u00D7\u2715\u2716]/g, 'x');
+    var patterns = [
+      { re: /^(.+?)\s+(\d+)\s*x\s*(AMRAP|failure|fail|כשל|עד\s+כשל)\b/i, m:[1,2,3] },
+      { re: /^(.+?)(?:\s+-\s+|\s*[:\u2014]\s*)(\d+)\s*(?:סטים|sets?)\s*[,]?\s*(?:של\s+|of\s+|x\s*|)(\d+(?:\s*-\s*\d+)?\+?)\s*(?:reps?|חזרות)?/i, m:[1,2,3] },
+      { re: /^(.+?)\s+(\d+)\s+(?:sets?|סטים)\s*[,x]\s*(\d+(?:\s*-\s*\d+)?\+?)\s*(?:reps?|חזרות)?/i, m:[1,2,3] },
+      { re: /^(.+?)\s+(\d+)\s+(?:sets?|סטים)\s+(?:of\s+|של\s+)(\d+(?:\s*-\s*\d+)?\+?)\s*(?:reps?|חזרות)?/i, m:[1,2,3] },
+      { re: /^(.+?),\s*(\d+)\s*(?:sets?|סטים),\s*(\d+(?:\s*-\s*\d+)?\+?)\s*(?:reps?|חזרות)?/i, m:[1,2,3] },
+      { re: /^(.+?)\s*\(\s*(\d+)\s*x\s*(\d+(?:\s*-\s*\d+)?\+?)\s*\)/i, m:[1,2,3] },
+      { re: /^(.+?)\s*\[\s*(\d+)\s*x\s*(\d+(?:\s*-\s*\d+)?\+?)\s*\]/i, m:[1,2,3] },
+      { re: /^(.+?)\s+(\d+)\s*x\s*(\d+(?:\s*-\s*\d+)?\+?)\b/i, m:[1,2,3] },
+      { re: /^(\d+)\s*x\s*(\d+(?:\s*-\s*\d+)?\+?)\s+(.+)$/i, m:[3,1,2] },
+      { re: /^(.+?)(?:\s+-\s+|\s*[:\u2014]\s*)(\d+)\s*(?:sets?|סטים)(?:$|[\s,;]|[^a-zA-Z\u05D0-\u05EA\d])(?!\s*\d)/i, m:[1,2,null], dr:'10' },
+      { re: /^(.+?)(?:\s+-\s+|\s*[:\u2014]\s*)(\d+(?:\s*-\s*\d+)?\+?)\s*(?:reps?|חזרות)(?:$|[\s,;]|[^a-zA-Z\u05D0-\u05EA\d])(?!\s*\d)/i, m:[1,null,2], ds:'3' }
+    ];
+    for (var i = 0; i < patterns.length; i++) {
+      var p = patterns[i];
+      var match = line.match(p.re);
+      if (!match) continue;
+      var name = (match[p.m[0]] || '').trim();
+      var sets = p.m[1] ? match[p.m[1]] : (p.ds || '3');
+      var reps = p.m[2] ? match[p.m[2]] : (p.dr || '10');
+      name = name.replace(/^[\s*\-+\u2022\u00B7]+/, '')
+                 .replace(/[\s,:;\u2014]+$/, '')
+                 .replace(/\s+-\s*$/, '')
+                 .replace(/\s{2,}/g, ' ').trim();
+      if (name.length < 2) continue;
+      if (/^[\d\s.]+$/.test(name)) continue;
+      if (name.length > 80) {
+        var cut = name.search(/[:;.]/);
+        if (cut > 5 && cut < 60) name = name.substring(0, cut).trim();
+      }
+      reps = String(reps).replace(/\s/g, '');
+      return { name: name, sets: String(sets), reps: reps };
+    }
+    return null;
+  }
 
-  // ── Week variants ──
-  var weekVariants=null;
-  if(mw1||mw4){
-    weekVariants={
-      w1:mw1?{sets:mw1[1],reps:mw1[2]}:{sets:sets,reps:reps},
-      w4:mw4?{sets:mw4[1],reps:mw4[2]}:{sets:sets,reps:reps}
+  function v3CleanRawText(text) {
+    if (!text || typeof text !== 'string') return '';
+    text = sanitize(text);
+    text = stripMarkdown(text);
+    text = flattenTables(text);
+    text = normalizeDayHeaders(text);
+    text = stripSectionHeaders(text);
+    text = consolidateMultiline(text);
+    return text;
+  }
+
+  var V3_DAY_RE = /^יום\s+([א-יA-Z\d]+)(?:\s+\u2014\s+(.+?))?\s*$/;
+
+  function shortNameOf(label) {
+    if (/^\d+$/.test(label)) {
+      var letters = ['A','B','C','D','E','F','G','H','I','J'];
+      var n = parseInt(label, 10);
+      if (n >= 1 && n <= 10) return letters[n-1];
+      return label;
+    }
+    if (/^[א-י]$/.test(label)) {
+      var heMap = {'א':'A','ב':'B','ג':'C','ד':'D','ה':'E','ו':'F','ז':'G','ח':'H','ט':'I','י':'J'};
+      return heMap[label] || label;
+    }
+    return label;
+  }
+
+  function isRestDay(desc) {
+    if (!desc) return false;
+    if (desc.length > 30) return false;
+    return /^(rest\s*day|rest|off\s*day|day\s*off|recovery|מנוחה|שחרור)$/i.test(desc.trim());
+  }
+
+  function v3ParseWorkout(rawText) {
+    var text = v3CleanRawText(rawText);
+    if (!text) return [];
+    var days = [];
+    var lines = text.split('\n');
+    var currentDay = null;
+    var hasGuesscat = (typeof guesscat === 'function');
+    for (var i = 0; i < lines.length; i++) {
+      var line = lines[i].trim();
+      if (!line) continue;
+      var dm = line.match(V3_DAY_RE);
+      if (dm) {
+        if (currentDay) days.push(currentDay);
+        var label = dm[1];
+        var desc = (dm[2] || '').trim();
+        currentDay = {
+          fullName: 'יום ' + label + (desc ? ' \u2014 ' + desc : ''),
+          shortName: shortNameOf(label),
+          desc: desc, exercises: [], isRestDay: isRestDay(desc), notes: []
+        };
+        continue;
+      }
+      if (!currentDay) {
+        currentDay = { fullName:'אימון 1', shortName:'A', desc:'', exercises:[], isRestDay:false, notes:[] };
+      }
+      var clean = line.replace(/^[\s*\-+\u2022\u00B7]+/, '').trim();
+      clean = clean.replace(/^\d+[.)]\s+/, '').trim();
+      if (!clean) continue;
+      if (/^(rest|rest\s+day|day\s+off|off|מנוחה|יום\s+מנוחה)$/i.test(clean)) {
+        currentDay.isRestDay = true; continue;
+      }
+      var ext = extractAnnotations(clean);
+      var ex = parseExerciseLine(ext.line);
+      if (ex) {
+        currentDay.exercises.push({
+          name: ex.name, sets: ex.sets, reps: ext.ann.special || ex.reps,
+          cat: hasGuesscat ? guesscat(ex.name) : null,
+          isSuperset: ext.ann.superset || false,
+          weekVariants: null,
+          suggestedWeight: ext.ann.weight || null,
+          tempo: ext.ann.tempo || null,
+          rpe: ext.ann.rpe || null,
+          intensity: ext.ann.intensity || null
+        });
+      } else if (clean.length > 5 && clean.length < 200) {
+        currentDay.notes.push(clean);
+      }
+    }
+    if (currentDay) days.push(currentDay);
+    return days;
+  }
+
+  function v3CreateExerciseCard(line, isSuperset) {
+    if (!line) return null;
+    var clean = line.replace(/^[\s*\-+\u2022\u00B7]+/, '').trim();
+    clean = clean.replace(/^\d+[.)]\s+/, '').trim();
+    if (!clean) return null;
+    var ext = extractAnnotations(clean);
+    var ex = parseExerciseLine(ext.line);
+    if (!ex) return null;
+    var hasGuesscat = (typeof guesscat === 'function');
+    return {
+      name: ex.name, sets: ex.sets, reps: ext.ann.special || ex.reps,
+      cat: hasGuesscat ? guesscat(ex.name) : null,
+      isSuperset: !!isSuperset || ext.ann.superset || false,
+      weekVariants: null,
+      suggestedWeight: ext.ann.weight || null,
+      tempo: ext.ann.tempo || null,
+      rpe: ext.ann.rpe || null,
+      intensity: ext.ann.intensity || null
     };
-    if(mw1){sets=mw1[1];reps=mw1[2];}
   }
 
-  return{name:name,sets:sets,reps:reps,cat:guesscat(name),isSuperset:!!isSuperset,weekVariants:weekVariants};
-}
+  window.cleanRawText = v3CleanRawText;
+  window.parseWorkout = v3ParseWorkout;
+  window.createExerciseCard = v3CreateExerciseCard;
+  window.__v3 = {
+    sanitize: sanitize, stripMarkdown: stripMarkdown, flattenTables: flattenTables,
+    normalizeDayHeaders: normalizeDayHeaders, stripSectionHeaders: stripSectionHeaders,
+    consolidateMultiline: consolidateMultiline, extractAnnotations: extractAnnotations,
+    parseExerciseLine: parseExerciseLine, cleanRawText: v3CleanRawText,
+    parseWorkout: v3ParseWorkout, createExerciseCard: v3CreateExerciseCard,
+    version: '3.0.0'
+  };
+})();
+/* === END PARSER v3 === */
 
-/* =====================================================================
-   END OF UPGRADED PARSER
-   ===================================================================== */
 
-/* HTML sanitization — prevent XSS in exercise names */
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
 
 var AB_KW=['בטן','פלאנק','crunch','plank','ab ','abs','leg raise','sit up'];
