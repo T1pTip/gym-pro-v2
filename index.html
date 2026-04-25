@@ -1505,20 +1505,39 @@ if (document.readyState === 'loading') {
     }
     return voices[0];
   }
+  function showVoiceToast(text) {
+    try {
+      var existing = document.getElementById('vcToast');
+      if (existing) existing.remove();
+      var toast = document.createElement('div');
+      toast.id = 'vcToast';
+      toast.textContent = '🔊 ' + text;
+      toast.style.cssText = 'position:fixed;top:70px;left:50%;transform:translateX(-50%);background:rgba(46,164,79,0.95);color:white;padding:10px 18px;border-radius:24px;font-size:15px;font-weight:600;z-index:99998;box-shadow:0 4px 12px rgba(0,0,0,0.3);direction:rtl;max-width:90vw;text-align:center;animation:vcToastIn 0.2s ease-out;';
+      document.body.appendChild(toast);
+      setTimeout(function(){ if(toast.parentNode){ toast.style.opacity='0'; toast.style.transition='opacity 0.3s'; setTimeout(function(){ toast.remove(); }, 300); } }, 2500);
+    } catch(e) {}
+  }
   function speak(text, opts) {
     if (!supported || !settings.enabled) return false;
     if (!text || typeof text !== 'string') return false;
     opts = opts || {};
     if (opts.interrupt) { try { window.speechSynthesis.cancel(); } catch(e) {} }
+    showVoiceToast(text);
     var lang = opts.lang || settings.lang;
     var u = new SpeechSynthesisUtterance(text);
     var _vol = Number(settings.volume); if (!isFinite(_vol)) _vol = 0.8;
     var _rate = Number(settings.rate); if (!isFinite(_rate)) _rate = 1.0;
     u.volume = Math.max(0, Math.min(1, _vol));
     u.rate = Math.max(0.5, Math.min(2, _rate));
-    u.lang = lang === 'he' ? 'he-IL' : 'en-US';
     var voice = pickVoice(lang);
-    if (voice) u.voice = voice;
+    // If user picked Hebrew but only English voice available, set lang to voice's lang
+    // to avoid unintelligible Hebrew-via-English-phonemes
+    if (voice) {
+      u.voice = voice;
+      u.lang = voice.lang;
+    } else {
+      u.lang = lang === 'he' ? 'he-IL' : 'en-US';
+    }
     try { window.speechSynthesis.speak(u); return true; } catch(e) { return false; }
   }
   var TEMPLATES = {
@@ -1664,11 +1683,47 @@ if (document.readyState === 'loading') {
       }
     });
   }
+  function showDiscoveryHint() {
+    try {
+      if (localStorage.getItem('gym_voice_v1_hinted') === '1') return;
+      // Show only when there's a plan loaded
+      if (!localStorage.getItem('gym_plan_v3')) return;
+      var btn = document.getElementById('vcBtn');
+      if (!btn) return;
+      var hint = document.createElement('div');
+      hint.id = 'vcHint';
+      var rect = btn.getBoundingClientRect();
+      hint.textContent = '💡 חדש! מאמן קולי לאימון';
+      hint.style.cssText = 'position:fixed;top:' + (rect.bottom + 8) + 'px;left:' + Math.max(8, rect.left - 100) + 'px;background:#2ea44f;color:white;padding:8px 14px;border-radius:8px;font-size:13px;font-weight:600;z-index:99997;box-shadow:0 4px 12px rgba(0,0,0,0.3);direction:rtl;cursor:pointer;animation:vcPulse 2s ease-in-out infinite;';
+      hint.onclick = function() { hint.remove(); localStorage.setItem('gym_voice_v1_hinted', '1'); togglePanel(); };
+      document.body.appendChild(hint);
+      // Auto-dismiss after 8 seconds
+      setTimeout(function() {
+        if (hint.parentNode) {
+          hint.style.opacity = '0';
+          hint.style.transition = 'opacity 0.5s';
+          setTimeout(function() { hint.remove(); }, 500);
+        }
+        localStorage.setItem('gym_voice_v1_hinted', '1');
+      }, 8000);
+    } catch(e) {}
+  }
   function init() {
     buildButton();
     bindEvents();
     refresh();
-    window.__vcUI = { refresh: refresh, togglePanel: togglePanel };
+    window.__vcUI = { refresh: refresh, togglePanel: togglePanel, showDiscoveryHint: showDiscoveryHint };
+    // Show hint shortly after init (when plan loaded)
+    setTimeout(showDiscoveryHint, 1500);
+    // Also show when doLoad runs
+    if (typeof window.doLoad === 'function') {
+      var origDoLoad = window.doLoad;
+      window.doLoad = function() {
+        var r = origDoLoad.apply(this, arguments);
+        setTimeout(showDiscoveryHint, 600);
+        return r;
+      };
+    }
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();
@@ -1761,5 +1816,18 @@ if (document.readyState === 'loading') {
 })();
 /* === END VOICE COACH HOOKS === */
 </script>
+<style id="vcStyles">
+@keyframes vcPulse {
+  0%, 100% { transform: scale(1); box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+  50% { transform: scale(1.05); box-shadow: 0 6px 18px rgba(46,164,79,0.5); }
+}
+@keyframes vcToastIn {
+  0% { transform: translateX(-50%) translateY(-20px); opacity: 0; }
+  100% { transform: translateX(-50%) translateY(0); opacity: 1; }
+}
+#vcBtn { transition: transform 0.15s ease; }
+#vcBtn:hover { transform: scale(1.1); }
+#vcBtn:active { transform: scale(0.95); }
+</style>
 </body>
 </html>
