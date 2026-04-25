@@ -441,55 +441,66 @@ function guesscat(n){for(var i=0;i<MMAP.length;i++)if(MMAP[i][0].test(n))return 
   }
 
   function normalizeDayHeaders(text) {
-    var weekCount = 0;
-    text = text.replace(/^[\s]*(?:Week|שבוע|Phase|פאזה)\s+(\d+(?:\s*-\s*\d+)?)\s*(?:\(([^)]+)\))?\s*:?\s*$/gim, function(_, n, d) {
-      weekCount++;
-      return 'Day ' + weekCount + (d ? ' \u2014 ' + d : '');
-    });
-    var lines = text.split('\n');
-    var out = [];
-    var dayCount = 0;
-    var patterns = [
-      { re: /^[\s]*יום\s+([א-יA-Z\d]+|ראשון|שני|שלישי|רביעי|חמישי|שישי|שבת)(?=\s|$|[:\-\u2014()])\s*(?:[:\-\u2014]\s*|\(\s*)?(.*?)\s*$/, type:'explicit' },
-      { re: /^[\s]*אימון\s+([א-יA-Z\d]+)(?=\s|$|[:\-\u2014()])\s*(?:[:\-\u2014]\s*|\(\s*)?(.*?)\s*$/, type:'explicit' },
-      { re: /^[\s]*Day\s+([A-Za-z\d]+)\b\s*(?:[:\-\u2014]\s*|\(\s*)?(.*?)\s*$/i, type:'explicit' },
-      { re: /^[\s]*(?:Workout|Session|Routine|Training)\s+([A-Z\d]+)\b\s*(?:[:\-\u2014]\s*|\(\s*)?(.*?)\s*$/i, type:'explicit' },
-      { re: /^[\s]*(sunday|monday|tuesday|wednesday|thursday|friday|saturday|sun|mon|tue|tues|wed|thu|thur|thurs|fri|sat)\b\s*(?:[:\-\u2014]\s*)?(.*?)\s*$/i, type:'dow' },
-      { re: /^[\s]*(ראשון|שני|שלישי|רביעי|חמישי|שישי|שבת)(?=\s|$|[:\-\u2014()])\s*(?:[:\-\u2014]\s*)?(.*?)\s*$/, type:'dow' }
-    ];
-    function balanceParens(s) {
-      if (!s) return s;
-      var open = (s.match(/\(/g)||[]).length, close = (s.match(/\)/g)||[]).length;
-      while (close > open && /\)\s*$/.test(s)) { s = s.replace(/\s*\)\s*$/, ''); close--; }
-      while (open > close) { s += ')'; close++; }
-      return s;
-    }
-    for (var i = 0; i < lines.length; i++) {
-      var line = lines[i];
-      var matched = false;
-      for (var p = 0; p < patterns.length; p++) {
-        var m = line.match(patterns[p].re);
-        if (!m) continue;
-        dayCount++;
-        var label = m[1];
-        var lower = label.toLowerCase();
-        if (patterns[p].type === 'dow') label = String(dayCount);
-        else { if (WORD_NUM[lower]) label = WORD_NUM[lower]; if (DOW_KEYS_HE.indexOf(label) >= 0) label = String(dayCount); }
-        var desc = (m[2] || '').trim();
-        desc = desc.replace(/\s*[:\-\u2014]\s*$/, '');
-        desc = balanceParens(desc);
-        var pm = desc.match(/^\(\s*(.+?)\s*\)$/);
-        if (pm) desc = pm[1];
-        var canonical = 'יום ' + label;
-        if (desc) canonical += ' \u2014 ' + desc;
-        out.push(canonical);
-        matched = true;
-        break;
+      var DOW_KEYS_HE = ['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת'];
+      var WORD_NUM = {'one':'1','two':'2','three':'3','four':'4','five':'5','six':'6','seven':'7','eight':'8','first':'1','second':'2','third':'3','fourth':'4','fifth':'5'};
+      var weekCount = 0;
+      text = text.replace(/^[\s]*(?:Week|שבוע|Phase|פאזה|שלב|מחזור|Block|בלוק)\s+(\d+(?:\s*-\s*\d+)?)\s*[:\-\u2014]?\s*([^\n]*?)$/gim, function(_, n, rest) {
+        weekCount++;
+        rest = (rest || '').trim();
+        rest = rest.replace(/\s*\(\s*(?:שבוע(?:ות)?|weeks?)\s+\d+(?:\s*-\s*\d+)?\s*\)\s*$/i, '').trim();
+        rest = rest.replace(/^[:\-\u2014]\s*/, '').trim();
+        return 'Day ' + weekCount + (rest ? ' \u2014 ' + rest : '');
+      });
+      var bodyTypeCount = 0;
+      text = text.replace(/^[\s]*[\W]*?\s*(PUSH|PULL|LEGS?|UPPER(?:\s+BODY)?|LOWER(?:\s+BODY)?|FULL\s*BODY|CHEST|BACK|SHOULDERS|ARMS|CORE|ABS|LEG)(?:\s+DAY)?\s*[\W]*\s*$/gim, function(m, type) {
+        bodyTypeCount++;
+        return 'Day ' + bodyTypeCount + ' \u2014 ' + type;
+      });
+      text = text.replace(/^[\s]*Step\s+\d+\s*:\s*/gim, '');
+      var lines = text.split('\n');
+      var out = [];
+      var dayCount = 0;
+      var patterns = [
+        { re: /^[^a-zA-Z\u05D0-\u05EA\d\n]*\s*יום\s+([א-יA-Z\d]+|ראשון|שני|שלישי|רביעי|חמישי|שישי|שבת)(?=\s|$|[:\-\u2014()])\s*(?:[:\-\u2014]\s*|\(\s*)?(.*?)\s*$/, type:'explicit' },
+        { re: /^[^a-zA-Z\u05D0-\u05EA\d\n]*\s*אימון\s+([א-יA-Z\d]+)(?=\s|$|[:\-\u2014()])\s*(?:[:\-\u2014]\s*|\(\s*)?(.*?)\s*$/, type:'explicit' },
+        { re: /^[\s]*Day\s+([A-Za-z\d]+)\b\s*(?:[:\-\u2014]\s*|\(\s*)?(.*?)\s*$/i, type:'explicit' },
+        { re: /^[\s]*(?:Workout|Session|Routine|Training)\s+([A-Z\d]+)\b\s*(?:[:\-\u2014]\s*|\(\s*)?(.*?)\s*$/i, type:'explicit' },
+        { re: /^[\s]*(sunday|monday|tuesday|wednesday|thursday|friday|saturday|sun|mon|tue|tues|wed|thu|thur|thurs|fri|sat)\b\s*(?:[:\-\u2014]\s*)?(.*?)\s*$/i, type:'dow' },
+        { re: /^[\s]*(ראשון|שני|שלישי|רביעי|חמישי|שישי|שבת)(?=\s|$|[:\-\u2014()])\s*(?:[:\-\u2014]\s*)?(.*?)\s*$/, type:'dow' }
+      ];
+      function balanceParens(s) {
+        if (!s) return s;
+        var open = (s.match(/\(/g)||[]).length, close = (s.match(/\)/g)||[]).length;
+        while (close > open && /\)\s*$/.test(s)) { s = s.replace(/\s*\)\s*$/, ''); close--; }
+        while (open > close) { s += ')'; close++; }
+        return s;
       }
-      if (!matched) out.push(line);
+      for (var i = 0; i < lines.length; i++) {
+        var line = lines[i];
+        var matched = false;
+        for (var p = 0; p < patterns.length; p++) {
+          var m = line.match(patterns[p].re);
+          if (!m) continue;
+          dayCount++;
+          var label = m[1];
+          var lower = label.toLowerCase();
+          if (patterns[p].type === 'dow') label = String(dayCount);
+          else { if (WORD_NUM[lower]) label = WORD_NUM[lower]; if (DOW_KEYS_HE.indexOf(label) >= 0) label = String(dayCount); }
+          var desc = (m[2] || '').trim();
+          desc = desc.replace(/\s*[:\-\u2014]\s*$/, '');
+          desc = balanceParens(desc);
+          var pm = desc.match(/^\(\s*(.+?)\s*\)$/);
+          if (pm) desc = pm[1];
+          var canonical = 'יום ' + label;
+          if (desc) canonical += ' \u2014 ' + desc;
+          out.push(canonical);
+          matched = true;
+          break;
+        }
+        if (!matched) out.push(line);
+      }
+      return out.join('\n');
     }
-    return out.join('\n');
-  }
 
   function stripSectionHeaders(text) {
     var lines = text.split('\n');
@@ -572,6 +583,8 @@ function guesscat(n){for(var i=0;i<MMAP.length;i++)if(MMAP[i][0].test(n))return 
   }
 
   function parseExerciseLine(line) {
+      var __p12=line&&typeof line==='string'&&line.match(/^(.+?)(?:\s*[:\-\u2014]\s+|\s+[\-\u2014]\s+)(\d+)\s*(?:x|×|X)\s*(AMRAP|failure|fail|עד\s+כשל|כשל)(?=$|[^a-zA-Z\u05D0-\u05EA])/i);
+      if(__p12){var __p12r=__p12[3];if(/עד\s+כשל|כשל|fail/i.test(__p12r))__p12r='AMRAP';return{name:__p12[1].trim(),sets:parseInt(__p12[2],10),reps:__p12r};}
     if (!line) return null;
     line = line.replace(/[\u00D7\u2715\u2716]/g, 'x');
     var patterns = [
@@ -661,12 +674,12 @@ function guesscat(n){for(var i=0;i<MMAP.length;i++)if(MMAP[i][0].test(n))return 
         currentDay = {
           fullName: 'יום ' + label + (desc ? ' \u2014 ' + desc : ''),
           shortName: shortNameOf(label),
-          desc: desc, exercises: [], isRestDay: isRestDay(desc), notes: []
+          desc: desc, exercises: [], isRestDay: isRestDay(desc), notes: [], _implicit: false
         };
         continue;
       }
       if (!currentDay) {
-        currentDay = { fullName:'אימון 1', shortName:'A', desc:'', exercises:[], isRestDay:false, notes:[] };
+        currentDay = { fullName:'אימון 1', shortName:'A', desc:'', exercises:[], isRestDay:false, notes:[], _implicit:true };
       }
       var clean = line.replace(/^[\s*\-+\u2022\u00B7]+/, '').trim();
       clean = clean.replace(/^\d+[.)]\s+/, '').trim();
@@ -692,6 +705,7 @@ function guesscat(n){for(var i=0;i<MMAP.length;i++)if(MMAP[i][0].test(n))return 
       }
     }
     if (currentDay) days.push(currentDay);
+    days = days.filter(function(d){if(d.exercises.length>0)return true;if(!d._implicit&&d.isRestDay)return true;return false;});
     return days;
   }
 
