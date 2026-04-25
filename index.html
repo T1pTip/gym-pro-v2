@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="he" dir="rtl">
+<html lang="he">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
@@ -12,7 +12,7 @@
 <meta name="description" content="אפליקציית אימון חכמה">
 <link rel="apple-touch-icon" sizes="180x180" href="icon-180.png">
 <link rel="icon" type="image/png" sizes="32x32" href="icon-32.png">
-<link rel="manifest" id="manifestLink">
+<link rel="manifest" href="manifest.json">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Heebo:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -202,7 +202,7 @@ body.ltr .dropdown-menu{left:auto;right:0}
       <button class="edit-btn" id="editBtn" style="min-width:36px;padding:7px 10px;display:flex;align-items:center;justify-content:center"><svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a.996.996 0 0 0 0-1.41l-2.34-2.34a.996.996 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg></button>
       <div style="display:flex;align-items:center;gap:7px"><span class="streak-badge" id="streakBadge" style="display:none"></span><div class="logo">GYM PRO</div></div>
       <div style="display:flex;align-items:center;gap:6px">
-      <a class="guide-btn" id="guideBtn" href="#" onclick="event.preventDefault();window.open('https://t1ptip.github.io/gym-pro-v2/guide.html?lang='+(curLang||'he'),'_blank')" title="מדריך">?</a>
+      <a class="guide-btn" id="guideBtn" href="#" onclick="event.preventDefault();window.open('https://t1ptip.github.io/gym-pro-v2/guide.html?lang='+(curLang||'he'),'_blank','noopener,noreferrer')" title="מדריך">?</a>
       <div class="menu-btn" id="menuBtn" onclick="toggleMenu()" style="position:relative">
         <div class="menu-dots"><span></span><span></span><span></span></div>
         <div class="dropdown-menu" id="dropdownMenu">
@@ -299,6 +299,7 @@ function setLang(lang){
   curLang=lang;T=LANG[lang];
   try{localStorage.setItem('gym_lang',lang);}catch(e){}
   document.documentElement.lang=lang==='he'?'he':'en';
+  document.documentElement.dir=lang==='he'?'rtl':'ltr';
   document.body.className=lang==='he'?'rtl':'ltr';
   document.getElementById('btnHE').className=lang==='he'?'active':'';
   document.getElementById('btnEN').className=lang==='en'?'active':'';
@@ -644,6 +645,7 @@ function loadHist(){try{return JSON.parse(localStorage.getItem(HIST_KEY)||'{}');
 function saveHist(h){try{localStorage.setItem(HIST_KEY,JSON.stringify(h));}catch(e){}}
 function recordWeight(exName,kg){
   if(!kg||isNaN(kg))return;
+  var wasPR=isPR(exName,+kg);
   var h=loadHist(),k=exKey(exName);
   if(!h[k])h[k]=[];
   var today=new Date().toISOString().slice(0,10);
@@ -651,6 +653,23 @@ function recordWeight(exName,kg){
   if(idx>=0){h[k][idx].kg=+kg;}else{h[k].push({date:today,kg:+kg});}
   if(h[k].length>30)h[k]=h[k].slice(-30);
   saveHist(h);
+  if(wasPR&&+kg>0){
+    recordPR(exName);
+    setTimeout(function(){
+      var cards=document.querySelectorAll('.ex-row');
+      cards.forEach(function(c){
+        if(c.textContent&&c.textContent.indexOf(exName)>-1){
+          c.classList.add('pr-card');
+          if(!c.querySelector('.pr-badge')){
+            var b=document.createElement('span');
+            b.className='pr-badge';
+            b.textContent=(typeof T!=='undefined'?T.prBadge:null)||'🏆';
+            c.appendChild(b);
+          }
+        }
+      });
+    },100);
+  }
 }
 function openHistModal(encodedName){
   var exName=decodeURIComponent(encodedName);
@@ -843,7 +862,7 @@ function renderTabs(){
     var icons='';/* v2.5: icons removed from tabs */
     var iconsHtml=(meta.isDay||/\p{Emoji}/u.test(meta.label))?'':
       (icons?'<span style="display:block;font-size:12px;line-height:1.4;margin-top:1px">'+icons+'</span>':'');
-    html+='<div class="tab'+(i===curDay?' active':'')+'" onclick="switchDay('+i+')" title="'+d.fullName+'"><span class="tab-label">'+meta.label+'</span>'+iconsHtml+prog+'</div>';
+    html+='<div class="tab'+(i===curDay?' active':'')+'" onclick="switchDay('+i+')" title="'+esc(d.fullName)+'"><span class="tab-label">'+esc(meta.label)+'</span>'+iconsHtml+prog+'</div>';
   }
   el.innerHTML=html;
 }
@@ -891,7 +910,7 @@ function renderDay(){
           +chipsHtml
           +'<div class="ex-actions">'
             +'<button class="hist-btn" onclick="openHistModal(\''+enc+'\')" title="History">&#128200;</button>'
-            +'<a class="yt-btn" href="'+ytUrl+'" target="_blank" title="YouTube">'+YT_SVG+'</a>'
+            +'<a class="yt-btn" href="'+ytUrl+'" target="_blank" rel="noopener noreferrer" title="YouTube">'+YT_SVG+'</a>'
             +'<button class="check-btn'+(isDone?' done-state':'')+'" id="cb_'+j+'" onclick="toggleDone('+j+',\''+enc+'\')">'+(isDone?T.completed:T.done)+'</button>'
           +'</div>'
         +'</div>'
@@ -925,7 +944,26 @@ function toggleDone(j,enc){
   if(done[k]){
     startTimer(decodeURIComponent(enc));
     try{navigator.vibrate(100);}catch(e){}
-    var day=plan[curDay];var allDone=day&&day.exercises.every(function(_,idx){return!!done[curDay+'_'+idx];});if(allDone)updateStreak();
+    var day=plan[curDay];
+    if(day&&day.exercises&&day.exercises.length){
+      var total=day.exercises.length,doneCount=0;
+      day.exercises.forEach(function(_,idx){if(done[curDay+'_'+idx])doneCount++;});
+      if(doneCount===total){
+        updateStreak();
+        var prs=countPRsToday();
+        setTimeout(function(){showSummary(total,prs);},500);
+        setTimeout(function(){
+          var tab=document.querySelector('.tab.active');
+          if(tab&&!tab.querySelector('.day-done-badge')){
+            var b=document.createElement('span');
+            b.className='day-done-badge';
+            b.textContent=' ✓';
+            b.style.cssText='color:#34d399;font-weight:900;margin-inline-start:4px';
+            tab.appendChild(b);
+          }
+        },600);
+      }
+    }
   }
 }
 function planToText(){
@@ -977,6 +1015,17 @@ document.addEventListener('click',function(e){
     if(m)m.classList.remove('open');
   }
 });
+document.addEventListener('keydown',function(e){
+  if(e.key!=='Escape')return;
+  var hm=document.getElementById('histModal');
+  if(hm&&hm.classList.contains('open')){closeHistModal();return;}
+  var sm=document.getElementById('summaryOverlay');
+  if(sm&&sm.classList.contains('open')){closeSummary();return;}
+  var ep=document.getElementById('editPanel');
+  if(ep&&ep.style.display==='block'){ep.style.display='none';return;}
+  var dm=document.getElementById('dropdownMenu');
+  if(dm&&dm.classList.contains('open')){dm.classList.remove('open');return;}
+});
 var _deletedPlan=null,_undoTimer=null;
 function deletePlan(e){
   if(e)e.stopPropagation();
@@ -996,28 +1045,32 @@ var stored='';try{stored=localStorage.getItem(STORAGE_KEY)||'';}catch(e){}
 if(stored){try{var p3=JSON.parse(stored);if(p3&&p3.length&&p3[0].exercises&&p3[0].exercises.length){plan=p3.map(function(d,i){var lb=makeLabels(d.fullName||'',i);return{fullName:lb.full,sh:lb.sh,tabDescription:d.tabDescription||'',exercises:d.exercises||[]};});}}catch(e){}}
 setLang(curLang);renderStreak();
 
-/* PWA */
-(function(){
-  var manifest={
-    name:'GYM PRO',
-    short_name:'GYM PRO',
-    description:'אפליקציית אימון חכמה',
-    start_url:'.',
-    display:'standalone',
-    background_color:'#0d0f1a',
-    theme_color:'#0d0f1a',
-    orientation:'portrait',
-    icons:[
-      {src:'icon-192.png',sizes:'192x192',type:'image/png',purpose:'any maskable'},
-      {src:'icon-512.png',sizes:'512x512',type:'image/png',purpose:'any maskable'}
-    ]
-  };
-  var blob=new Blob([JSON.stringify(manifest)],{type:'application/json'});
-  document.getElementById('manifestLink').href=URL.createObjectURL(blob);
-})();if('serviceWorker' in navigator){
-  var swCode=["var CACHE='gym-pro-v2-app';","self.addEventListener('install',function(e){e.waitUntil(caches.open(CACHE).then(function(c){return c.addAll(['./']);}));self.skipWaiting();});","self.addEventListener('activate',function(e){e.waitUntil(caches.keys().then(function(keys){return Promise.all(keys.filter(function(k){return k!==CACHE;}).map(function(k){return caches.delete(k);}));}));self.clients.claim();});","self.addEventListener('fetch',function(e){e.respondWith(caches.match(e.request).then(function(r){return r||fetch(e.request).catch(function(){return caches.match('./');});}));});"].join('\n');
-  var swBlob=new Blob([swCode],{type:'text/javascript'});
-  navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(function(){});
+/* PWA: real sw.js (no Blob URLs) — manifest.json is referenced by <link> in <head> */
+if('serviceWorker' in navigator){
+  window.addEventListener('load',function(){
+    navigator.serviceWorker.register('sw.js',{scope:'./'})
+      .then(function(reg){
+        console.log('[SW] registered:',reg.scope);
+        reg.addEventListener('updatefound',function(){
+          var nw=reg.installing;
+          if(!nw)return;
+          nw.addEventListener('statechange',function(){
+            if(nw.state==='installed'&&navigator.serviceWorker.controller){
+              showUpdateToast();
+            }
+          });
+        });
+      })
+      .catch(function(e){console.warn('[SW] register failed:',e);});
+  });
+}
+function showUpdateToast(){
+  var t=document.createElement('div');
+  t.style.cssText='position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#1e2235;border:1px solid rgba(129,140,248,0.4);color:#a5b4fc;padding:10px 18px;border-radius:12px;z-index:400;font-size:13px;font-weight:700;white-space:nowrap;animation:toast-in .2s ease;cursor:pointer';
+  t.textContent=(curLang==='he'?'🔄 גרסה חדשה זמינה — לחץ לרענון':'🔄 New version available — click to reload');
+  t.onclick=function(){location.reload();};
+  document.body.appendChild(t);
+  setTimeout(function(){t.remove();},10000);
 }
 var deferredPrompt=null;
 window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();deferredPrompt=e;showInstallBanner();});
@@ -1035,11 +1088,11 @@ function dismissBanner(){var b=document.getElementById('installBanner');if(b)b.r
 
 function getPRMax(exName){
   try{
-    var h=JSON.parse(localStorage.getItem('gym_weights_hist')||'{}');
-    var key=exName;
+    var h=JSON.parse(localStorage.getItem(HIST_KEY)||'{}');
+    var key=exKey(exName);
     var arr=h[key]||[];
     if(!arr.length)return 0;
-    return arr.reduce(function(m,e){var v=(typeof e==='object')?e.w:e;return Math.max(m,v||0);},0);
+    return arr.reduce(function(m,e){return Math.max(m,(e&&e.kg)||0);},0);
   }catch(e){return 0;}
 }
 function isPR(exName,kg){
@@ -1141,7 +1194,7 @@ function showSummary(exCount,prCount){
     document.getElementById('sumPRs').textContent=prCount||0;
     document.getElementById('sumPRsLbl').textContent=T2.sumPRsLbl||'🏆';
     var streak=0;
-    try{var st=JSON.parse(localStorage.getItem('gym_streak')||'{}');streak=st.count||0;}catch(e){}
+    try{var st=JSON.parse(localStorage.getItem(STREAK_KEY)||'{}');streak=st.count||0;}catch(e){}
     document.getElementById('sumStreak').textContent=streak;
     document.getElementById('sumStreakLbl').textContent=T2.sumStreakLbl||'streak';
     document.getElementById('summaryCloseBtn').textContent=T2.sumClose||'Done';
@@ -1171,72 +1224,7 @@ function recordPR(exName){
   }catch(e){}
 }
 
-(function(){
-  if(typeof recordWeight==='function'){
-    var origRW=recordWeight;
-    window.recordWeight=function(name,kg){
-      var wasPR=isPR(name,kg);
-      var r=origRW.apply(this,arguments);
-      if(wasPR&&kg>0){
-        recordPR(name);
-        setTimeout(function(){
-          var cards=document.querySelectorAll('.ex-row');
-          cards.forEach(function(c){
-            if(c.textContent && c.textContent.indexOf(name)>-1){
-              c.classList.add('pr-card');
-              if(!c.querySelector('.pr-badge')){
-                var b=document.createElement('span');
-                b.className='pr-badge';
-                b.textContent=((typeof T!=='undefined')?T.prBadge:null)||'🏆';
-                c.appendChild(b);
-              }
-            }
-          });
-        },100);
-      }
-      return r;
-    };
-  }
-})();
-
-(function(){
-  if(typeof toggleDone==='function'){
-    var orig=toggleDone;
-    window.toggleDone=function(){
-      var r=orig.apply(this,arguments);
-      setTimeout(function(){
-        try{
-          if(typeof plan!=='undefined' && typeof curDay!=='undefined' && typeof done!=='undefined'){
-            var day=plan[curDay];
-            if(day && day.exercises && day.exercises.length){
-              var total=day.exercises.length;
-              var doneCount=0;
-              day.exercises.forEach(function(ex,i){
-                if(done[curDay+'_'+i])doneCount++;
-              });
-              if(doneCount===total && total>0){
-                var prs=countPRsToday();
-                setTimeout(function(){showSummary(total,prs);},500);
-                /* Mark current day tab as complete */
-                setTimeout(function(){
-                  var tab=document.querySelector('.tab.active');
-                  if(tab && !tab.querySelector('.day-done-badge')){
-                    var b=document.createElement('span');
-                    b.className='day-done-badge';
-                    b.textContent=' ✓';
-                    b.style.cssText='color:#34d399;font-weight:900;margin-inline-start:4px';
-                    tab.appendChild(b);
-                  }
-                },600);
-              }
-            }
-          }
-        }catch(e){}
-      },200);
-      return r;
-    };
-  }
-})();
+/* IIFE patches consolidated into recordWeight() and toggleDone() above (Rule #5: 4-patch refactor preempted) */
 
 
 
