@@ -1575,10 +1575,19 @@ if (document.readyState === 'loading') {
     btn.style.cssText = 'background:none;border:none;cursor:pointer;font-size:20px;padding:6px 8px;color:inherit;';
     btn.textContent = '🔇';
     btn.addEventListener('click', function(e){ e.stopPropagation(); togglePanel(); });
-    var langWrap = $('#btnHE');
-    if (langWrap && langWrap.parentNode) langWrap.parentNode.insertBefore(btn, langWrap);
-    else if (document.querySelector('header')) document.querySelector('header').appendChild(btn);
-    else document.body.appendChild(btn);
+    // Match editBtn styling for visual consistency
+    btn.style.cssText = 'background:none;border:none;cursor:pointer;font-size:22px;padding:0;color:inherit;width:44px;height:44px;display:flex;align-items:center;justify-content:center;';
+    var editBtn = $('#editBtn');
+    var hrow = document.querySelector('.hrow');
+    if (editBtn && editBtn.parentNode) {
+      if (editBtn.nextSibling) editBtn.parentNode.insertBefore(btn, editBtn.nextSibling);
+      else editBtn.parentNode.appendChild(btn);
+    } else if (hrow) {
+      hrow.insertBefore(btn, hrow.firstChild);
+    } else {
+      btn.style.cssText += 'position:fixed;top:10px;right:60px;z-index:1000;';
+      document.body.appendChild(btn);
+    }
     return btn;
   }
   function buildPanel() {
