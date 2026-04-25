@@ -1,4 +1,4 @@
-const CACHE = 'gym-pro-v7';
+const CACHE = 'gym-pro-v8';
 const PRECACHE = ['./','./index.html','./manifest.json','./icon-192.png','./icon-512.png','./icon-180.png','./icon-32.png'];
 
 self.addEventListener('install', e => {

@@ -1471,5 +1471,271 @@ if (document.readyState === 'loading') {
     <span class="pb-float-emoji">🍺</span>
   </div>
 </button>
+<script>
+/* === VOICE COACH v1 === */
+(function(){
+  if (window.__voiceCoachInstalled) return;
+  window.__voiceCoachInstalled = true;
+  var VC_KEY = 'gym_voice_v1';
+  var DEFAULTS = { enabled: false, lang: 'he', volume: 0.8, rate: 1.0 };
+  function safeGet() {
+    try { var raw = localStorage.getItem(VC_KEY); if (!raw) return Object.assign({}, DEFAULTS);
+      var parsed = JSON.parse(raw); return Object.assign({}, DEFAULTS, parsed);
+    } catch(e) { return Object.assign({}, DEFAULTS); }
+  }
+  function safeSet(s) { try { localStorage.setItem(VC_KEY, JSON.stringify(s)); } catch(e) {} }
+  var settings = safeGet();
+  var supported = typeof window.speechSynthesis !== 'undefined' && typeof window.SpeechSynthesisUtterance !== 'undefined';
+  var voicesCache = null;
+  function getVoices() {
+    if (!supported) return [];
+    if (voicesCache && voicesCache.length) return voicesCache;
+    voicesCache = window.speechSynthesis.getVoices() || [];
+    return voicesCache;
+  }
+  function pickVoice(lang) {
+    var voices = getVoices();
+    if (!voices.length) return null;
+    var prefix = lang === 'he' ? 'he' : 'en';
+    var exact = voices.find(function(v){ return v.lang && v.lang.toLowerCase().indexOf(prefix + '-') === 0; });
+    if (exact) return exact;
+    if (lang === 'he') {
+      var enFallback = voices.find(function(v){ return v.lang && v.lang.toLowerCase().indexOf('en-') === 0; });
+      if (enFallback) return enFallback;
+    }
+    return voices[0];
+  }
+  function speak(text, opts) {
+    if (!supported || !settings.enabled) return false;
+    if (!text || typeof text !== 'string') return false;
+    opts = opts || {};
+    if (opts.interrupt) { try { window.speechSynthesis.cancel(); } catch(e) {} }
+    var lang = opts.lang || settings.lang;
+    var u = new SpeechSynthesisUtterance(text);
+    var _vol = Number(settings.volume); if (!isFinite(_vol)) _vol = 0.8;
+    var _rate = Number(settings.rate); if (!isFinite(_rate)) _rate = 1.0;
+    u.volume = Math.max(0, Math.min(1, _vol));
+    u.rate = Math.max(0.5, Math.min(2, _rate));
+    u.lang = lang === 'he' ? 'he-IL' : 'en-US';
+    var voice = pickVoice(lang);
+    if (voice) u.voice = voice;
+    try { window.speechSynthesis.speak(u); return true; } catch(e) { return false; }
+  }
+  var TEMPLATES = {
+    he: {
+      timer_start: function(exName) { return 'מתחיל רסט. תרגיל הבא: ' + (exName || ''); },
+      timer_end: 'קדימה. סט הבא',
+      day_switch: function(label) { return 'יום ' + label; },
+      workout_complete: 'סיימת! כל הכבוד'
+    },
+    en: {
+      timer_start: function(exName) { return 'Rest started. Next: ' + (exName || ''); },
+      timer_end: 'Go. Next set',
+      day_switch: function(label) { return 'Day ' + label; },
+      workout_complete: 'Workout complete. Great job'
+    }
+  };
+  function getT() { return TEMPLATES[settings.lang] || TEMPLATES.he; }
+  window.voiceCoach = {
+    speak: speak,
+    isSupported: function(){ return supported; },
+    isEnabled: function(){ return supported && settings.enabled; },
+    settings: function(){ return Object.assign({}, settings); },
+    update: function(patch){
+      settings = Object.assign({}, settings, patch);
+      safeSet(settings);
+      if (window.__vcUI && window.__vcUI.refresh) window.__vcUI.refresh();
+    },
+    onTimerStart: function(exName){ if (!settings.enabled) return; speak(getT().timer_start(exName || ''), { interrupt: true }); },
+    onTimerEnd: function(){ if (!settings.enabled) return; speak(getT().timer_end, { interrupt: true }); },
+    onDaySwitch: function(label){ if (!settings.enabled) return; speak(getT().day_switch(label), { interrupt: true }); },
+    onWorkoutComplete: function(){ if (!settings.enabled) return; speak(getT().workout_complete, { interrupt: true }); },
+    listVoices: function(){ return getVoices().map(function(v){ return { name: v.name, lang: v.lang, def: v.default }; }); }
+  };
+  if (supported) {
+    getVoices();
+    if (window.speechSynthesis.onvoiceschanged !== undefined) {
+      window.speechSynthesis.onvoiceschanged = function(){ voicesCache = null; getVoices(); };
+    }
+  }
+})();
+/* === END VOICE COACH === */
+/* === VOICE COACH UI === */
+(function(){
+  if (window.__voiceCoachUIInstalled) return;
+  window.__voiceCoachUIInstalled = true;
+  function $(sel) { return document.querySelector(sel); }
+  function buildButton() {
+    if ($('#vcBtn')) return;
+    var btn = document.createElement('button');
+    btn.id = 'vcBtn';
+    btn.type = 'button';
+    btn.title = 'Voice Coach';
+    btn.setAttribute('aria-label', 'Voice Coach toggle');
+    btn.style.cssText = 'background:none;border:none;cursor:pointer;font-size:20px;padding:6px 8px;color:inherit;';
+    btn.textContent = '🔇';
+    btn.addEventListener('click', function(e){ e.stopPropagation(); togglePanel(); });
+    var langWrap = $('#btnHE');
+    if (langWrap && langWrap.parentNode) langWrap.parentNode.insertBefore(btn, langWrap);
+    else if (document.querySelector('header')) document.querySelector('header').appendChild(btn);
+    else document.body.appendChild(btn);
+    return btn;
+  }
+  function buildPanel() {
+    if ($('#vcPanel')) return $('#vcPanel');
+    var p = document.createElement('div');
+    p.id = 'vcPanel';
+    p.style.cssText = 'position:fixed;top:60px;right:8px;background:var(--card,#1a1a1a);color:var(--text,#fff);border:1px solid var(--border,#333);border-radius:12px;padding:14px;min-width:240px;box-shadow:0 8px 24px rgba(0,0,0,0.4);z-index:9999;display:none;direction:rtl;';
+    p.innerHTML = '<div style="font-weight:700;margin-bottom:10px;font-size:15px;">🎙️ מאמן קולי</div>'
+      + '<label style="display:flex;align-items:center;gap:8px;margin:8px 0;cursor:pointer;"><input type="checkbox" id="vcEnabled" style="width:18px;height:18px;"><span>הפעל</span></label>'
+      + '<div style="margin:10px 0;"><label style="font-size:13px;display:block;margin-bottom:4px;">שפה</label>'
+      + '<div style="display:flex;gap:6px;"><button data-lang="he" class="vc-lang-btn" style="flex:1;padding:6px;border:1px solid var(--border,#444);background:transparent;color:inherit;border-radius:6px;cursor:pointer;">עברית</button>'
+      + '<button data-lang="en" class="vc-lang-btn" style="flex:1;padding:6px;border:1px solid var(--border,#444);background:transparent;color:inherit;border-radius:6px;cursor:pointer;">English</button></div></div>'
+      + '<div style="margin:10px 0;"><label style="font-size:13px;display:block;margin-bottom:4px;">עוצמה: <span id="vcVolVal">80%</span></label><input type="range" id="vcVol" min="0" max="100" value="80" style="width:100%;"></div>'
+      + '<div style="margin:10px 0;"><label style="font-size:13px;display:block;margin-bottom:4px;">קצב: <span id="vcRateVal">1.0×</span></label><input type="range" id="vcRate" min="50" max="200" value="100" style="width:100%;"></div>'
+      + '<button id="vcTest" style="width:100%;padding:8px;background:#2ea44f;color:white;border:none;border-radius:6px;cursor:pointer;font-weight:600;margin-top:8px;">🔊 בדוק</button>'
+      + '<div id="vcStatus" style="font-size:11px;opacity:0.7;margin-top:8px;text-align:center;"></div>';
+    document.body.appendChild(p);
+    return p;
+  }
+  function refresh() {
+    var s = window.voiceCoach.settings();
+    var supported = window.voiceCoach.isSupported();
+    var btn = $('#vcBtn');
+    if (btn) { btn.textContent = supported && s.enabled ? '🔊' : '🔇'; btn.style.opacity = supported ? '1' : '0.4'; }
+    var en = $('#vcEnabled');
+    if (en) en.checked = !!s.enabled;
+    var vol = $('#vcVol');
+    if (vol) { vol.value = Math.round(s.volume * 100); $('#vcVolVal').textContent = Math.round(s.volume * 100) + '%'; }
+    var rate = $('#vcRate');
+    if (rate) { rate.value = Math.round(s.rate * 100); $('#vcRateVal').textContent = (s.rate).toFixed(1) + '×'; }
+    document.querySelectorAll('.vc-lang-btn').forEach(function(b){
+      var on = b.getAttribute('data-lang') === s.lang;
+      b.style.background = on ? '#2ea44f' : 'transparent';
+      b.style.color = on ? 'white' : 'inherit';
+    });
+    var status = $('#vcStatus');
+    if (status) {
+      if (!supported) status.textContent = '⚠️ הדפדפן לא תומך';
+      else {
+        var voices = window.voiceCoach.listVoices();
+        var heVoice = voices.find(function(v){ return v.lang.toLowerCase().indexOf('he-') === 0; });
+        status.textContent = heVoice ? '✓ ' + heVoice.name : '⚠️ אין קול עברי, fallback EN';
+      }
+    }
+  }
+  function togglePanel() {
+    var p = buildPanel();
+    var visible = p.style.display === 'block';
+    p.style.display = visible ? 'none' : 'block';
+    if (!visible) refresh();
+  }
+  function bindEvents() {
+    document.addEventListener('click', function(e){
+      var p = $('#vcPanel');
+      if (!p || p.style.display !== 'block') return;
+      if (e.target.closest('#vcPanel') || e.target.closest('#vcBtn')) return;
+      p.style.display = 'none';
+    });
+    document.addEventListener('change', function(e){
+      if (e.target.id === 'vcEnabled') window.voiceCoach.update({ enabled: e.target.checked });
+    });
+    document.addEventListener('input', function(e){
+      if (e.target.id === 'vcVol') window.voiceCoach.update({ volume: parseInt(e.target.value, 10) / 100 });
+      else if (e.target.id === 'vcRate') window.voiceCoach.update({ rate: parseInt(e.target.value, 10) / 100 });
+    });
+    document.addEventListener('click', function(e){
+      var langBtn = e.target.closest('.vc-lang-btn');
+      if (langBtn) window.voiceCoach.update({ lang: langBtn.getAttribute('data-lang') });
+      if (e.target.id === 'vcTest') {
+        if (!window.voiceCoach.isEnabled()) window.voiceCoach.update({ enabled: true });
+        var s = window.voiceCoach.settings();
+        var msg = s.lang === 'he' ? 'בדיקת קול. שומעים אותי?' : 'Voice test. Can you hear me?';
+        window.voiceCoach.speak(msg, { interrupt: true });
+      }
+    });
+  }
+  function init() {
+    buildButton();
+    bindEvents();
+    refresh();
+    window.__vcUI = { refresh: refresh, togglePanel: togglePanel };
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
+})();
+/* === END VOICE COACH UI === */
+/* === VOICE COACH HOOKS === */
+(function(){
+  if (window.__voiceCoachHooked) return;
+  window.__voiceCoachHooked = true;
+  function tryHook(fnName, wrapper) {
+    var orig = window[fnName];
+    if (typeof orig !== 'function') return false;
+    window[fnName] = wrapper(orig);
+    return true;
+  }
+  tryHook('startTimer', function(orig){
+    return function(exName) {
+      try {
+        if (window.voiceCoach && window.voiceCoach.isEnabled()) {
+          var nextEx = null;
+          try {
+            var raw = localStorage.getItem('gym_plan_v3');
+            if (raw && typeof window.parseWorkout === 'function') {
+              var days = window.parseWorkout(raw);
+              var activeIdx = (typeof window.currentDayIdx === 'number') ? window.currentDayIdx : 0;
+              var day = days[activeIdx];
+              if (day && day.exercises) {
+                var idx = day.exercises.findIndex(function(e){ return e.name === exName; });
+                if (idx >= 0 && idx < day.exercises.length - 1) {
+                  nextEx = day.exercises[idx + 1].name;
+                }
+              }
+            }
+          } catch(e) {}
+          window.voiceCoach.onTimerStart(nextEx);
+        }
+      } catch(e) {}
+      return orig.apply(this, arguments);
+    };
+  });
+  tryHook('beep', function(orig){
+    return function() {
+      try {
+        if (window.voiceCoach && window.voiceCoach.isEnabled()) {
+          window.voiceCoach.onTimerEnd();
+        }
+      } catch(e) {}
+      return orig.apply(this, arguments);
+    };
+  });
+  tryHook('switchDay', function(orig){
+    return function(idx) {
+      var result = orig.apply(this, arguments);
+      try {
+        if (window.voiceCoach && window.voiceCoach.isEnabled()) {
+          var btns = document.querySelectorAll('.tab .tab-label, [role="tab"] .tab-label');
+          var label = btns[idx] ? btns[idx].textContent.replace(/^יום\s*/, '').trim() : String(idx + 1);
+          window.voiceCoach.onDaySwitch(label);
+        }
+      } catch(e) {}
+      return result;
+    };
+  });
+  tryHook('endWorkout', function(orig){
+    return function() {
+      var result = orig.apply(this, arguments);
+      try {
+        if (window.voiceCoach && window.voiceCoach.isEnabled()) {
+          window.voiceCoach.onWorkoutComplete();
+        }
+      } catch(e) {}
+      return result;
+    };
+  });
+})();
+/* === END VOICE COACH HOOKS === */
+</script>
 </body>
 </html>
